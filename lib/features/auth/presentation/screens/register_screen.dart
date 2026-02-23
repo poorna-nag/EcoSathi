@@ -6,17 +6,17 @@ import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import '../../data/models/user_model.dart';
-import 'register_screen.dart';
 
-class LoginScreen extends StatefulWidget {
+class RegisterScreen extends StatefulWidget {
   final UserRole selectedRole;
-  const LoginScreen({super.key, required this.selectedRole});
+  const RegisterScreen({super.key, required this.selectedRole});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -39,55 +39,40 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       },
       child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_rounded, color: Colors.black),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
         body: SingleChildScrollView(
           child: Container(
-            height: MediaQuery.of(context).size.height,
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [AppColors.primary.withOpacity(0.05), Colors.white],
-              ),
-            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 80),
-                Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color:
-                          (widget.selectedRole == UserRole.user
-                                  ? AppColors.primary
-                                  : AppColors.secondary)
-                              .withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      widget.selectedRole == UserRole.user
-                          ? Icons.recycling_rounded
-                          : Icons.delivery_dining_rounded,
-                      color: widget.selectedRole == UserRole.user
-                          ? AppColors.primary
-                          : AppColors.secondary,
-                      size: 48,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 20),
                 Text(
-                  '${AppStrings.welcomeBack} ${widget.selectedRole == UserRole.user ? 'Recycler' : 'Partner'}',
+                  AppStrings.createAccount,
                   style: Theme.of(
                     context,
                   ).textTheme.displayLarge?.copyWith(fontSize: 28),
                 ),
                 Text(
-                  AppStrings.loginToContinue,
+                  '${AppStrings.signUpAs}${widget.selectedRole == UserRole.user ? 'Recycler' : 'Partner'}',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
-                const SizedBox(height: 60),
+                const SizedBox(height: 40),
+                TextField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.person_rounded),
+                    hintText: 'Full Name',
+                  ),
+                ),
+                const SizedBox(height: 20),
                 TextField(
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
@@ -114,36 +99,28 @@ class _LoginScreenState extends State<LoginScreen> {
                     return ElevatedButton(
                       onPressed: () {
                         context.read<AuthBloc>().add(
-                          LoginEvent(
+                          RegisterEvent(
+                            name: _nameController.text,
                             phone: _phoneController.text,
                             password: _passwordController.text,
+                            role: widget.selectedRole,
                           ),
                         );
                       },
-                      child: const Text(AppStrings.login),
+                      child: const Text(AppStrings.register),
                     );
                   },
                 ),
                 const SizedBox(height: 20),
-                const Center(
-                  child: Text('Demo: 1234567890 (User) | 0987654321 (Partner)'),
-                ),
-                const Spacer(),
-                Center(
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              RegisterScreen(selectedRole: widget.selectedRole),
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      '${AppStrings.donNotHaveAccount}${AppStrings.register}',
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(AppStrings.alreadyHaveAccount),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text(AppStrings.login),
                     ),
-                  ),
+                  ],
                 ),
                 const SizedBox(height: 40),
               ],

@@ -10,6 +10,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<CheckAuthSessionEvent>(_onCheckAuthSession);
     on<LoginEvent>(_onLogin);
     on<LogoutEvent>(_onLogout);
+    on<RegisterEvent>(_onRegister);
   }
 
   void _onCheckAuthSession(
@@ -38,5 +39,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   void _onLogout(LogoutEvent event, Emitter<AuthState> emit) {
     emit(Unauthenticated());
+  }
+
+  void _onRegister(RegisterEvent event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+    try {
+      final user = await _authRepository.register(
+        name: event.name,
+        phone: event.phone,
+        password: event.password,
+        role: event.role,
+      );
+      if (user != null) {
+        emit(Authenticated(user));
+      } else {
+        emit(const AuthError('Registration failed'));
+      }
+    } catch (e) {
+      emit(AuthError(e.toString()));
+    }
   }
 }

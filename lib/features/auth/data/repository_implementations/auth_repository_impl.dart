@@ -26,6 +26,23 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<UserModel?> register({
+    required String name,
+    required String phone,
+    required String password,
+    required UserRole role,
+  }) async {
+    // Mocking Firebase Auth
+    await Future.delayed(const Duration(seconds: 2));
+    return UserModel(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: name,
+      phone: phone,
+      role: role,
+    );
+  }
+
+  @override
   Future<void> logout() async {
     await Future.delayed(const Duration(milliseconds: 500));
   }

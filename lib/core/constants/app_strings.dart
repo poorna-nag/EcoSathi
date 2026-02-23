@@ -27,6 +27,11 @@ class AppStrings {
   static const String loginToContinue = 'Login to continue your green journey';
   static const String enterPhone = 'Enter Phone Number';
   static const String login = 'Login';
+  static const String register = 'Register';
+  static const String donNotHaveAccount = "Don't have an account? ";
+  static const String alreadyHaveAccount = "Already have an account? ";
+  static const String createAccount = 'Create Account';
+  static const String signUpAs = 'Sign up as a ';
 
   // Home / Pickup
   static const String requestPickup = 'Request Pickup';
