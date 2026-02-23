@@ -65,7 +65,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ElevatedButton(
                   onPressed: () {
                     if (_currentPage == _data.length - 1) {
-                      Navigator.pushReplacement(
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const RoleSelectionScreen(),

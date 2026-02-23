@@ -6,7 +6,7 @@ import 'features/auth/presentation/bloc/auth_event.dart';
 import 'features/auth/presentation/bloc/auth_state.dart';
 import 'features/auth/presentation/screens/onboarding_screen.dart';
 import 'features/home/presentation/screens/main_navigation_screen.dart';
-import 'features/partner/presentation/screens/partner_home_screen.dart';
+import 'features/partner/presentation/screens/partner_main_navigation_screen.dart';
 import 'features/auth/data/repository_implementations/auth_repository_impl.dart';
 import 'features/auth/data/models/user_model.dart';
 
@@ -50,7 +50,7 @@ class AuthWrapper extends StatelessWidget {
       builder: (context, state) {
         if (state is Authenticated) {
           if (state.user.role == UserRole.partner) {
-            return const PartnerHomeScreen();
+            return const PartnerMainNavigationScreen();
           }
           return const MainNavigationScreen();
         }

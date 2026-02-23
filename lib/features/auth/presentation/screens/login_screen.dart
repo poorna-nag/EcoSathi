@@ -124,10 +124,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     );
                   },
                 ),
-                const SizedBox(height: 20),
-                const Center(
-                  child: Text('Demo: 1234567890 (User) | 0987654321 (Partner)'),
-                ),
                 const Spacer(),
                 Center(
                   child: TextButton(
