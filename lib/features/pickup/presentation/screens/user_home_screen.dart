@@ -332,9 +332,12 @@ class UserHomeScreen extends StatelessWidget {
             const SizedBox(height: 16),
             _buildSelectField(context, 'Location', 'Select your address'),
             const Spacer(),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Confirm Request'),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Confirm Request'),
+              ),
             ),
           ],
         ),

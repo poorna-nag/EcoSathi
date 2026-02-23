@@ -12,10 +12,15 @@ import 'features/auth/data/models/user_model.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'injection_container.dart' as di;
+import 'package:logger/logger.dart';
+
+final logger = Logger();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await di.init();
   runApp(const EcoSathiApp());
 }
 
@@ -27,8 +32,7 @@ class EcoSathiApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) =>
-              AuthBloc(AuthRepositoryImpl())..add(CheckAuthSessionEvent()),
+          create: (context) => di.sl<AuthBloc>()..add(CheckAuthSessionEvent()),
         ),
       ],
       child: MaterialApp(
@@ -54,7 +58,17 @@ class AuthWrapper extends StatelessWidget {
           }
           return const MainNavigationScreen();
         }
-        if (state is Unauthenticated || state is AuthError) {
+        if (state is Unauthenticated) {
+          return const OnboardingScreen();
+        }
+        if (state is AuthError &&
+            state.message.contains('Session check failed')) {
+          return const OnboardingScreen();
+        }
+        // If we are in AuthError (during login/register) but not a session failure,
+        // keep showing the onboarding/login/register stack by returning OnboardingScreen
+        // as the base, or better, keep the current state if possible.
+        if (state is AuthError || state is AuthInitial) {
           return const OnboardingScreen();
         }
         return const Scaffold(body: Center(child: CircularProgressIndicator()));
