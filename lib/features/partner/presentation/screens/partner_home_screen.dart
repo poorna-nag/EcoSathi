@@ -142,11 +142,9 @@ class PartnerHomeScreen extends StatelessWidget {
           ElevatedButton(
             onPressed: () {},
             style: ElevatedButton.styleFrom(
-              minimumSize: const Size(100, 40),
               backgroundColor: Colors.white,
               foregroundColor: AppColors.secondary,
               elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),

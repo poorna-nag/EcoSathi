@@ -31,7 +31,7 @@ class _PartnerMainNavigationScreenState
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, -5),
             ),
@@ -42,7 +42,7 @@ class _PartnerMainNavigationScreenState
           onDestinationSelected: (index) =>
               setState(() => _selectedIndex = index),
           backgroundColor: Colors.white,
-          indicatorColor: AppColors.secondary.withOpacity(0.1),
+          indicatorColor: AppColors.secondary.withValues(alpha: 0.1),
           height: 70,
           destinations: const [
             NavigationDestination(

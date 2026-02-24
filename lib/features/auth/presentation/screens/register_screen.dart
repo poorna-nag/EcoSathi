@@ -6,7 +6,6 @@ import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import '../../data/models/user_model.dart';
-import '../../../../core/widgets/custom_button.dart';
 
 class RegisterScreen extends StatefulWidget {
   final UserRole selectedRole;
@@ -20,7 +19,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -52,107 +50,80 @@ class _RegisterScreenState extends State<RegisterScreen> {
         body: SingleChildScrollView(
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 20),
-                  Text(
-                    AppStrings.createAccount,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.displayLarge?.copyWith(fontSize: 28),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20),
+                Text(
+                  AppStrings.createAccount,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.displayLarge?.copyWith(fontSize: 28),
+                ),
+                Text(
+                  '${AppStrings.signUpAs}${widget.selectedRole == UserRole.user ? 'Recycler' : 'Partner'}',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 40),
+                TextField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.person_rounded),
+                    hintText: 'Full Name',
                   ),
-                  Text(
-                    '${AppStrings.signUpAs}${widget.selectedRole == UserRole.user ? 'Recycler' : 'Partner'}',
-                    style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.phone_rounded),
+                    hintText: AppStrings.enterPhone,
                   ),
-                  const SizedBox(height: 40),
-                  TextFormField(
-                    controller: _nameController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your full name';
-                      }
-                      return null;
-                    },
-                    decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.person_rounded),
-                      hintText: 'Full Name',
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.lock_rounded),
+                    hintText: 'Password',
+                  ),
+                ),
+                const SizedBox(height: 40),
+                BlocBuilder<AuthBloc, AuthState>(
+                  builder: (context, state) {
+                    if (state is AuthLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    return ElevatedButton(
+                      onPressed: () {
+                        context.read<AuthBloc>().add(
+                          RegisterEvent(
+                            name: _nameController.text,
+                            phone: _phoneController.text,
+                            password: _passwordController.text,
+                            role: widget.selectedRole,
+                          ),
+                        );
+                      },
+                      child: const Text(AppStrings.register),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(AppStrings.alreadyHaveAccount),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text(AppStrings.login),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your phone number';
-                      }
-                      if (value.length < 10) {
-                        return 'Please enter a valid phone number';
-                      }
-                      return null;
-                    },
-                    decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.phone_rounded),
-                      hintText: AppStrings.enterPhone,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a password';
-                      }
-                      if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
-                      }
-                      return null;
-                    },
-                    decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.lock_rounded),
-                      hintText: 'Password',
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                  BlocBuilder<AuthBloc, AuthState>(
-                    builder: (context, state) {
-                      return CustomButton(
-                        text: AppStrings.register,
-                        isLoading: state is AuthLoading,
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            context.read<AuthBloc>().add(
-                              RegisterEvent(
-                                name: _nameController.text,
-                                phone: _phoneController.text,
-                                password: _passwordController.text,
-                                role: widget.selectedRole,
-                              ),
-                            );
-                          }
-                        },
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(AppStrings.alreadyHaveAccount),
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text(AppStrings.login),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 40),
-                ],
-              ),
+                  ],
+                ),
+                const SizedBox(height: 40),
+              ],
             ),
           ),
         ),

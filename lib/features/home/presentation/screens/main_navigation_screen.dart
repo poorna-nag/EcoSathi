@@ -28,7 +28,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, -5),
             ),
@@ -39,7 +39,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           onDestinationSelected: (index) =>
               setState(() => _selectedIndex = index),
           backgroundColor: Colors.white,
-          indicatorColor: AppColors.primary.withOpacity(0.1),
+          indicatorColor: AppColors.primary.withValues(alpha: 0.1),
           destinations: const [
             NavigationDestination(
               icon: Icon(Icons.home_outlined),
