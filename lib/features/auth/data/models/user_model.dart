@@ -9,6 +9,7 @@ class UserModel extends Equatable {
   final String? email;
   final UserRole role;
   final String? address;
+  final String? photoUrl;
   final double? latitude;
   final double? longitude;
   final double totalEarnings;
@@ -21,6 +22,7 @@ class UserModel extends Equatable {
     this.email,
     required this.role,
     this.address,
+    this.photoUrl,
     this.latitude,
     this.longitude,
     this.totalEarnings = 0.0,
@@ -38,6 +40,7 @@ class UserModel extends Equatable {
         orElse: () => UserRole.user,
       ),
       address: map['address'],
+      photoUrl: map['photoUrl'],
       latitude: map['latitude']?.toDouble(),
       longitude: map['longitude']?.toDouble(),
       totalEarnings: map['totalEarnings']?.toDouble() ?? 0.0,
@@ -52,6 +55,7 @@ class UserModel extends Equatable {
       'email': email,
       'role': role.name,
       'address': address,
+      'photoUrl': photoUrl,
       'latitude': latitude,
       'longitude': longitude,
       'totalEarnings': totalEarnings,
@@ -60,5 +64,5 @@ class UserModel extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, name, phone, email, role];
+  List<Object?> get props => [id, name, phone, email, role, photoUrl];
 }

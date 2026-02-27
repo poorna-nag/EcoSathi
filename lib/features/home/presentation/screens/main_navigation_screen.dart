@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../pickup/presentation/screens/user_home_screen.dart';
+import '../../../profile/presentation/screens/profile_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -16,7 +17,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     const UserHomeScreen(),
     const Center(child: Text('My History')),
     const Center(child: Text('Wallet')),
-    const Center(child: Text('Profile')),
+    const ProfileScreen(),
   ];
 
   @override
