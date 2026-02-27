@@ -18,20 +18,18 @@ class RoleSelectionScreen extends StatelessWidget {
             end: Alignment.bottomCenter,
             colors: [AppColors.primary.withOpacity(0.05), Colors.white],
           ),
-          image: const DecorationImage(
-            image: AssetImage('assets/images/app_icon.png'),
-            fit: BoxFit.cover,
-            opacity: 0.1,
-          ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'assets/images/app_icon.png',
-              width: 150,
-              height: 150,
-              fit: BoxFit.contain,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Image.asset(
+                'assets/images/app_icon.png',
+                width: 140,
+                height: 140,
+                fit: BoxFit.cover,
+              ),
             ),
             const SizedBox(height: 48),
             Text(

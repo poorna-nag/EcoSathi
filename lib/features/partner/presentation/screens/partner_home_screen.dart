@@ -58,16 +58,33 @@ class PartnerHomeScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        Row(
           children: [
-            const Text(
-              'Welcome back,',
-              style: TextStyle(color: Colors.grey, fontSize: 16),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                'assets/images/app_icon.png',
+                width: 45,
+                height: 45,
+                fit: BoxFit.cover,
+              ),
             ),
-            Text(
-              'Partner Jack 👋', // Should be dynamic from bloc
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Welcome back,',
+                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                ),
+                Text(
+                  'Partner Jack 👋',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ],
         ),

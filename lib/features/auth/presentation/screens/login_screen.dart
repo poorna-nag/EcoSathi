@@ -56,28 +56,18 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 const SizedBox(height: 80),
                 Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color:
-                          (widget.selectedRole == UserRole.user
-                                  ? AppColors.primary
-                                  : AppColors.secondary)
-                              .withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      widget.selectedRole == UserRole.user
-                          ? Icons.recycling_rounded
-                          : Icons.delivery_dining_rounded,
-                      color: widget.selectedRole == UserRole.user
-                          ? AppColors.primary
-                          : AppColors.secondary,
-                      size: 48,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child: Image.asset(
+                      'assets/images/app_icon.png',
+                      width: 140,
+                      height: 140,
+                      fit: BoxFit
+                          .cover, // Covering to 'crop' any internal padding
                     ),
                   ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 48),
                 Text(
                   '${AppStrings.welcomeBack} ${widget.selectedRole == UserRole.user ? 'Recycler' : 'Partner'}',
                   style: Theme.of(
@@ -91,10 +81,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 60),
                 TextField(
                   controller: _phoneController,
-                  keyboardType: TextInputType.phone,
+                  keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.phone_rounded),
-                    hintText: AppStrings.enterPhone,
+                    prefixIcon: Icon(Icons.person_rounded),
+                    hintText: 'Email or Phone Number',
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -151,7 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: () {
                         context.read<AuthBloc>().add(
                           LoginEvent(
-                            phone: _phoneController.text,
+                            identifier: _phoneController.text,
                             password: _passwordController.text,
                           ),
                         );

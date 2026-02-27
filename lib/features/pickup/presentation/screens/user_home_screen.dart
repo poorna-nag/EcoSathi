@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../widgets/request_pickup_sheet.dart';
 
 class UserHomeScreen extends StatelessWidget {
   const UserHomeScreen({super.key});
@@ -36,11 +37,16 @@ class UserHomeScreen extends StatelessWidget {
                         backgroundColor: Colors.white.withOpacity(0.1),
                       ),
                     ),
-                    const Center(
-                      child: Icon(
-                        Icons.eco_rounded,
-                        size: 80,
-                        color: Colors.white24,
+                    Center(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(24),
+                        child: Image.asset(
+                          'assets/images/app_icon.png',
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                          opacity: const AlwaysStoppedAnimation(0.2),
+                        ),
                       ),
                     ),
                   ],
@@ -254,7 +260,15 @@ class UserHomeScreen extends StatelessWidget {
               color: AppColors.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.recycling, color: AppColors.primary),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                'assets/images/app_icon.png',
+                width: 24,
+                height: 24,
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -296,68 +310,7 @@ class UserHomeScreen extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.7,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-        ),
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: const BoxDecoration(
-                  color: Colors.black12,
-                  borderRadius: BorderRadius.all(Radius.circular(2)),
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
-            Text(
-              'Schedule Pickup',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 24),
-            _buildSelectField(context, 'Plastic Type', 'e.g. Bottles, Mixed'),
-            const SizedBox(height: 16),
-            _buildSelectField(
-              context,
-              'Estimated Weight',
-              'Enter weight in kg',
-            ),
-            const SizedBox(height: 16),
-            _buildSelectField(context, 'Location', 'Select your address'),
-            const Spacer(),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Confirm Request'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSelectField(BuildContext context, String label, String hint) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          decoration: InputDecoration(
-            hintText: hint,
-            suffixIcon: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
-          ),
-        ),
-      ],
+      builder: (context) => const RequestPickupSheet(),
     );
   }
 }

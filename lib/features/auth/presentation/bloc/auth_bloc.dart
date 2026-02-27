@@ -18,15 +18,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
-    // Simulate check session
-    await Future.delayed(const Duration(seconds: 2));
-    emit(Unauthenticated());
+    try {
+      final user = await _authRepository.getCurrentUser();
+      if (user != null) {
+        emit(Authenticated(user));
+      } else {
+        emit(Unauthenticated());
+      }
+    } catch (e) {
+      emit(Unauthenticated()); // Fallback to login
+    }
   }
 
   void _onLogin(LoginEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
-      final user = await _authRepository.login(event.phone, event.password);
+      final user = await _authRepository.login(
+        event.identifier,
+        event.password,
+      );
       if (user != null) {
         emit(Authenticated(user));
       } else {
@@ -37,7 +47,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  void _onLogout(LogoutEvent event, Emitter<AuthState> emit) {
+  void _onLogout(LogoutEvent event, Emitter<AuthState> emit) async {
+    await _authRepository.logout();
     emit(Unauthenticated());
   }
 

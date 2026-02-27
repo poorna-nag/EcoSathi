@@ -1,7 +1,7 @@
 import '../models/user_model.dart';
 
 abstract class AuthRepository {
-  Future<UserModel?> login(String phone, String password);
+  Future<UserModel?> login(String identifier, String password);
   Future<UserModel?> register({
     required String name,
     required String email,
