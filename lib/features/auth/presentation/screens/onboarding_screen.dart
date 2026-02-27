@@ -131,17 +131,20 @@ class OnboardingPage extends StatelessWidget {
           end: Alignment.bottomCenter,
           colors: [data.color.withOpacity(0.1), Colors.white],
         ),
+        image: const DecorationImage(
+          image: AssetImage('assets/images/app_icon.png'),
+          fit: BoxFit.cover,
+          opacity: 0.1,
+        ),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.all(40),
-            decoration: BoxDecoration(
-              color: data.color.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(data.icon, size: 100, color: data.color),
+          Image.asset(
+            'assets/images/app_icon.png',
+            width: 150,
+            height: 150,
+            fit: BoxFit.contain,
           ),
           const SizedBox(height: 48),
           Padding(

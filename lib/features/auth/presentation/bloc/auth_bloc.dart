@@ -46,6 +46,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final user = await _authRepository.register(
         name: event.name,
+        email: event.email,
         phone: event.phone,
         password: event.password,
         role: event.role,

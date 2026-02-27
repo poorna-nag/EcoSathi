@@ -34,6 +34,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<UserModel?> register({
     required String name,
+    required String email,
     required String phone,
     required String password,
     required UserRole role,
@@ -44,6 +45,7 @@ class AuthRepositoryImpl implements AuthRepository {
     final newUser = UserModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       name: name,
+      email: email,
       phone: phone,
       role: role,
     );
