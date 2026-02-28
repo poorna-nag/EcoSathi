@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
 
 class ChatSupportScreen extends StatefulWidget {
@@ -10,9 +12,11 @@ class ChatSupportScreen extends StatefulWidget {
 
 class _ChatSupportScreenState extends State<ChatSupportScreen> {
   final TextEditingController _messageController = TextEditingController();
+  final ImagePicker _picker = ImagePicker();
   final List<Map<String, dynamic>> _messages = [
     {
       'isUser': false,
+      'type': 'text',
       'text': 'Hello! How can we help you today with your EcoSathi experience?',
       'time': '10:00 AM',
     },
@@ -48,11 +52,34 @@ class _ChatSupportScreenState extends State<ChatSupportScreen> {
 
   bool _showCategories = true;
 
-  void _addMessage(bool isUser, String text) {
+  void _addMessage(bool isUser, String? text, {String? imagePath}) {
     setState(() {
-      _messages.add({'isUser': isUser, 'text': text, 'time': 'Just now'});
+      _messages.add({
+        'isUser': isUser,
+        'type': imagePath != null ? 'image' : 'text',
+        'text': text,
+        'imagePath': imagePath,
+        'time': 'Just now',
+      });
       if (isUser) _showCategories = false;
     });
+  }
+
+  Future<void> _pickImage() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      _addMessage(true, null, imagePath: image.path);
+
+      // Auto reply
+      Future.delayed(const Duration(seconds: 1), () {
+        if (mounted) {
+          _addMessage(
+            false,
+            'Thanks for sharing the photo! Our team is reviewing it and will get back to you shortly.',
+          );
+        }
+      });
+    }
   }
 
   void _handleCategoryClick(int index) {
@@ -115,11 +142,7 @@ class _ChatSupportScreenState extends State<ChatSupportScreen> {
               itemCount: _messages.length,
               itemBuilder: (context, index) {
                 final msg = _messages[index];
-                return _buildChatBubble(
-                  msg['text'],
-                  msg['isUser'],
-                  msg['time'],
-                );
+                return _buildChatBubble(msg);
               },
             ),
           ),
@@ -180,7 +203,10 @@ class _ChatSupportScreenState extends State<ChatSupportScreen> {
     );
   }
 
-  Widget _buildChatBubble(String text, bool isUser, String time) {
+  Widget _buildChatBubble(Map<String, dynamic> msg) {
+    final bool isUser = msg['isUser'];
+    final bool isImage = msg['type'] == 'image';
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Column(
@@ -189,7 +215,7 @@ class _ChatSupportScreenState extends State<ChatSupportScreen> {
             : CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.all(isImage ? 4 : 12),
             constraints: BoxConstraints(
               maxWidth: MediaQuery.of(context).size.width * 0.75,
             ),
@@ -209,17 +235,25 @@ class _ChatSupportScreenState extends State<ChatSupportScreen> {
                 ),
               ],
             ),
-            child: Text(
-              text,
-              style: TextStyle(
-                color: isUser ? Colors.white : AppColors.textPrimary,
-                fontSize: 14,
-              ),
-            ),
+            child: isImage
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.file(
+                      File(msg['imagePath']),
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : Text(
+                    msg['text'] ?? '',
+                    style: TextStyle(
+                      color: isUser ? Colors.white : AppColors.textPrimary,
+                      fontSize: 14,
+                    ),
+                  ),
           ),
           const SizedBox(height: 4),
           Text(
-            time,
+            msg['time'],
             style: const TextStyle(fontSize: 10, color: AppColors.textHint),
           ),
         ],
@@ -247,6 +281,22 @@ class _ChatSupportScreenState extends State<ChatSupportScreen> {
       ),
       child: Row(
         children: [
+          GestureDetector(
+            onTap: _pickImage,
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.attach_file_rounded,
+                color: AppColors.primary,
+                size: 20,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
           Expanded(
             child: TextField(
               controller: _messageController,

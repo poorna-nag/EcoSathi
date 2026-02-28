@@ -72,6 +72,11 @@ class AuthRepositoryImpl implements AuthRepository {
         default:
           throw e.message ?? 'Authentication failed. Please try again.';
       }
+    } on FirebaseException catch (e) {
+      if (e.code == 'unavailable') {
+        throw 'Connection error: Firebase service is unavailable. Please check your internet connection and ensure Firestore is enabled in your Firebase console.';
+      }
+      throw 'Database error: ${e.message}';
     } catch (e) {
       rethrow;
     }
@@ -140,10 +145,15 @@ class AuthRepositoryImpl implements AuthRepository {
         default:
           throw e.message ?? 'Registration failed. Please try again.';
       }
-    } catch (e) {
-      if (e.toString().contains('permission-denied')) {
+    } on FirebaseException catch (e) {
+      if (e.code == 'unavailable') {
+        throw 'Connection error: Firebase service is unavailable. Please check your internet connection and ensure Firestore is enabled in your Firebase console.';
+      }
+      if (e.code == 'permission-denied') {
         throw 'Database error: Access denied. Please ensure Firestore rules are set to test mode.';
       }
+      throw 'Database error: ${e.message}';
+    } catch (e) {
       rethrow;
     }
   }
@@ -163,10 +173,17 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   Future<UserModel?> _getUserFromFirestore(String uid) async {
-    final doc = await _firestore.collection('users').doc(uid).get();
-    if (doc.exists && doc.data() != null) {
-      return UserModel.fromMap(doc.data()!, doc.id);
+    try {
+      final doc = await _firestore.collection('users').doc(uid).get();
+      if (doc.exists && doc.data() != null) {
+        return UserModel.fromMap(doc.data()!, doc.id);
+      }
+      return null;
+    } on FirebaseException catch (e) {
+      if (e.code == 'unavailable') {
+        throw 'Connection error: Firebase service is unavailable. Please check your internet connection.';
+      }
+      rethrow;
     }
-    return null;
   }
 }

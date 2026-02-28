@@ -1,17 +1,33 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../profile/presentation/screens/address_list_screen.dart';
+import '../../data/repositories/pickup_repository.dart';
+import '../../data/models/pickup_model.dart';
 
 class RequestPickupSheet extends StatefulWidget {
-  const RequestPickupSheet({super.key});
+  final String? initialPlasticType;
+  const RequestPickupSheet({super.key, this.initialPlasticType});
 
   @override
   State<RequestPickupSheet> createState() => _RequestPickupSheetState();
 }
 
 class _RequestPickupSheetState extends State<RequestPickupSheet> {
-  final List<String> _selectedPlasticTypes = [];
+  late final List<String> _selectedPlasticTypes;
+  final PickupRepository _pickupRepository = PickupRepository();
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedPlasticTypes = widget.initialPlasticType != null
+        ? [widget.initialPlasticType!]
+        : [];
+  }
+
   final TextEditingController _weightController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   bool _isLoadingLocation = false;
@@ -19,13 +35,14 @@ class _RequestPickupSheetState extends State<RequestPickupSheet> {
   double? _longitude;
 
   final List<String> _plasticTypes = [
-    'Bottle',
-    'Bag',
-    'Mixed',
-    'Container',
-    'Wrappers',
-    'PVC/Pipe',
-    'Household items',
+    'PET Bottle',
+    'HDPE Plastic',
+    'PVC / Pipes',
+    'LDPE Plastic',
+    'PP Plastic',
+    'PS / Styrofoam',
+    'Multi-layer (MLP)',
+    'Mixed Plastic',
     'Other',
   ];
 
@@ -113,9 +130,9 @@ class _RequestPickupSheetState extends State<RequestPickupSheet> {
             child: Container(
               width: 40,
               height: 4,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: Colors.black12,
-                borderRadius: BorderRadius.all(Radius.circular(2)),
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
@@ -225,6 +242,39 @@ class _RequestPickupSheetState extends State<RequestPickupSheet> {
                     children: [
                       _buildSectionTitle('Pickup Location'),
                       TextButton.icon(
+                        onPressed: () async {
+                          final selectedAddress = await Navigator.push<String>(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const AddressListScreen(selectMode: true),
+                            ),
+                          );
+                          if (selectedAddress != null) {
+                            setState(() {
+                              _addressController.text = selectedAddress;
+                            });
+                          }
+                        },
+                        icon: const Icon(
+                          Icons.bookmark_added_rounded,
+                          size: 16,
+                        ),
+                        label: const Text(
+                          'Saved Addresses',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton.icon(
                         onPressed: _isLoadingLocation
                             ? null
                             : _getCurrentLocation,
@@ -285,41 +335,85 @@ class _RequestPickupSheetState extends State<RequestPickupSheet> {
             width: double.infinity,
             height: 56,
             child: ElevatedButton(
-              onPressed: () {
-                if (_selectedPlasticTypes.isEmpty ||
-                    _weightController.text.isEmpty ||
-                    _addressController.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please fill all fields'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                  return;
-                }
-                // TODO: Link with BLoC/Repository
-                final lat = _latitude ?? 0.0;
-                final lng = _longitude ?? 0.0;
-                debugPrint(
-                  'Pickup confirmation: Types: $_selectedPlasticTypes, Lat: $lat, Lng: $lng, Address: ${_addressController.text}',
-                );
+              onPressed: _isSaving
+                  ? null
+                  : () async {
+                      if (_selectedPlasticTypes.isEmpty ||
+                          _weightController.text.isEmpty ||
+                          _addressController.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please fill all fields'),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                        return;
+                      }
 
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Row(
-                      children: [
-                        Icon(Icons.check_circle, color: Colors.white),
-                        SizedBox(width: 12),
-                        Text('Pickup scheduled successfully!'),
-                      ],
-                    ),
-                    behavior: SnackBarBehavior.floating,
-                    backgroundColor: AppColors.primary,
-                    duration: const Duration(seconds: 3),
-                  ),
-                );
-              },
+                      final weight = double.tryParse(
+                        _weightController.text.trim(),
+                      );
+                      if (weight == null || weight <= 0) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please enter a valid weight'),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                        return;
+                      }
+
+                      setState(() => _isSaving = true);
+
+                      try {
+                        final user = FirebaseAuth.instance.currentUser;
+                        if (user == null) throw 'User not logged in';
+
+                        final newPickup = PickupModel(
+                          id: '', // Generated by Firestore
+                          userId: user.uid,
+                          plasticType: _selectedPlasticTypes.join(', '),
+                          estimatedWeight: weight,
+                          address: _addressController.text.trim(),
+                          latitude: _latitude ?? 0.0,
+                          longitude: _longitude ?? 0.0,
+                          scheduledTime: DateTime.now(),
+                          status: PickupStatus.pending,
+                          ratePerKg: 15.0, // Default rate
+                        );
+
+                        await _pickupRepository.addPickup(newPickup);
+
+                        if (mounted) {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Row(
+                                children: [
+                                  Icon(Icons.check_circle, color: Colors.white),
+                                  SizedBox(width: 12),
+                                  Text('Pickup scheduled successfully!'),
+                                ],
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: AppColors.primary,
+                              duration: const Duration(seconds: 3),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          setState(() => _isSaving = false);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Error: $e'),
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: AppColors.error,
+                            ),
+                          );
+                        }
+                      }
+                    },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
@@ -328,10 +422,22 @@ class _RequestPickupSheetState extends State<RequestPickupSheet> {
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              child: const Text(
-                'Confirm Request',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
+              child: _isSaving
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Text(
+                      'Confirm Request',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
           ),
           const SizedBox(height: 8),

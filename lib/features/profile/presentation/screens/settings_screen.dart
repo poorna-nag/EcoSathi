@@ -1,5 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
+import '../../../auth/presentation/bloc/auth_event.dart';
+import 'edit_profile_screen.dart';
+import 'change_password_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -27,117 +36,136 @@ class _SettingsScreenState extends State<SettingsScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 16),
+      body: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, state) {
+          final user = (state is Authenticated) ? state.user : null;
 
-            _buildSettingsGroup('ACCOUNT', [
-              _buildSettingsTile(
-                icon: Icons.person_outline_rounded,
-                title: 'Edit Profile',
-                onTap: () {},
-              ),
-              _buildSettingsTile(
-                icon: Icons.lock_outline_rounded,
-                title: 'Change Password',
-                onTap: () {},
-              ),
-              _buildSettingsTile(
-                icon: Icons.security_outlined,
-                title: 'Privacy Settings',
-                onTap: () {},
-              ),
-            ]),
-
-            _buildSettingsGroup('NOTIFICATIONS', [
-              _buildToggleTile(
-                icon: Icons.notifications_none_rounded,
-                title: 'Push Notifications',
-                value: _pushNotifications,
-                onChanged: (val) => setState(() => _pushNotifications = val),
-              ),
-              _buildToggleTile(
-                icon: Icons.alternate_email_rounded,
-                title: 'Email Notifications',
-                value: _emailAlerts,
-                onChanged: (val) => setState(() => _emailAlerts = val),
-              ),
-            ]),
-
-            _buildSettingsGroup('APP PREFERENCES', [
-              _buildToggleTile(
-                icon: Icons.dark_mode_outlined,
-                title: 'Dark Mode',
-                value: _darkMode,
-                onChanged: (val) => setState(() => _darkMode = val),
-              ),
-              _buildSettingsTile(
-                icon: Icons.language_rounded,
-                title: 'Language',
-                trailing: const Text(
-                  'English',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.bold,
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                const SizedBox(height: 16),
+                _buildSettingsGroup('ACCOUNT', [
+                  _buildSettingsTile(
+                    icon: Icons.person_outline_rounded,
+                    title: 'Edit Profile',
+                    onTap: () {
+                      if (user != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditProfileScreen(
+                              currentName: user.name,
+                              currentEmail: user.email,
+                              currentPhone: user.phone,
+                            ),
+                          ),
+                        );
+                      }
+                    },
                   ),
-                ),
-                onTap: () {},
-              ),
-            ]),
-
-            _buildSettingsGroup('ABOUT', [
-              _buildSettingsTile(
-                icon: Icons.info_outline_rounded,
-                title: 'Privacy Policy',
-                onTap: () {},
-              ),
-              _buildSettingsTile(
-                icon: Icons.description_outlined,
-                title: 'Terms of Service',
-                onTap: () {},
-              ),
-              const ListTile(
-                title: Text('App Version', style: TextStyle(fontSize: 14)),
-                trailing: Text(
-                  '1.0.0',
-                  style: TextStyle(color: AppColors.textHint),
-                ),
-              ),
-            ]),
-
-            const SizedBox(height: 32),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: OutlinedButton(
-                onPressed: () {
-                  // Show delete confirmation
-                  _showDeleteAccountDialog(context);
-                },
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.error,
-                  side: const BorderSide(color: AppColors.error),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                  _buildSettingsTile(
+                    icon: Icons.lock_outline_rounded,
+                    title: 'Change Password',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ChangePasswordScreen(),
+                        ),
+                      );
+                    },
                   ),
-                  padding: const EdgeInsets.all(16),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.delete_outline_rounded),
-                    SizedBox(width: 8),
-                    Text(
-                      'Delete Account',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                  _buildSettingsTile(
+                    icon: Icons.security_outlined,
+                    title: 'Privacy Settings',
+                    onTap: () => _showPrivacySettingsDialog(context),
+                  ),
+                ]),
+                _buildSettingsGroup('NOTIFICATIONS', [
+                  _buildToggleTile(
+                    icon: Icons.notifications_none_rounded,
+                    title: 'Push Notifications',
+                    value: _pushNotifications,
+                    onChanged: (val) =>
+                        setState(() => _pushNotifications = val),
+                  ),
+                  _buildToggleTile(
+                    icon: Icons.alternate_email_rounded,
+                    title: 'Email Notifications',
+                    value: _emailAlerts,
+                    onChanged: (val) => setState(() => _emailAlerts = val),
+                  ),
+                ]),
+                _buildSettingsGroup('APP PREFERENCES', [
+                  _buildToggleTile(
+                    icon: Icons.dark_mode_outlined,
+                    title: 'Dark Mode',
+                    value: _darkMode,
+                    onChanged: (val) => setState(() => _darkMode = val),
+                  ),
+                  _buildSettingsTile(
+                    icon: Icons.language_rounded,
+                    title: 'Language',
+                    trailing: const Text(
+                      'English',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ],
+                    onTap: () => _showLanguageDialog(context),
+                  ),
+                ]),
+                _buildSettingsGroup('ABOUT', [
+                  _buildSettingsTile(
+                    icon: Icons.info_outline_rounded,
+                    title: 'Privacy Policy',
+                    onTap: () => _launchUrl('https://ecosathi.com/privacy'),
+                  ),
+                  _buildSettingsTile(
+                    icon: Icons.description_outlined,
+                    title: 'Terms of Service',
+                    onTap: () => _launchUrl('https://ecosathi.com/terms'),
+                  ),
+                  const ListTile(
+                    title: Text('App Version', style: TextStyle(fontSize: 14)),
+                    trailing: Text(
+                      '1.0.0',
+                      style: TextStyle(color: AppColors.textHint),
+                    ),
+                  ),
+                ]),
+                const SizedBox(height: 32),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: OutlinedButton(
+                    onPressed: () => _showDeleteAccountDialog(context),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.error,
+                      side: const BorderSide(color: AppColors.error),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      padding: const EdgeInsets.all(16),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.delete_outline_rounded),
+                        SizedBox(width: 8),
+                        Text(
+                          'Delete Account',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 48),
+              ],
             ),
-            const SizedBox(height: 48),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -238,7 +266,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () async {
+              try {
+                final user = FirebaseAuth.instance.currentUser;
+                if (user != null) {
+                  // 1. Delete Firestore data
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(user.uid)
+                      .delete();
+                  // 2. Delete Auth user
+                  await user.delete();
+                  if (context.mounted) {
+                    Navigator.pop(context); // Close dialog
+                    context.read<AuthBloc>().add(
+                      LogoutEvent(),
+                    ); // Trigger logout from Bloc
+                  }
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Error: $e. You might need to re-login to delete account.',
+                      ),
+                    ),
+                  );
+                }
+              }
+            },
             child: const Text(
               'Delete',
               style: TextStyle(
@@ -250,5 +308,84 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
+  }
+
+  void _showLanguageDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text(
+          'Select Language',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        children: [
+          _buildLanguageOption('English', true),
+          _buildLanguageOption('Hindi', false),
+          _buildLanguageOption('Kannada', false),
+          _buildLanguageOption('Telugu', false),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLanguageOption(String title, bool isSelected) {
+    return ListTile(
+      title: Text(title),
+      trailing: isSelected
+          ? const Icon(Icons.check_circle, color: AppColors.primary)
+          : null,
+      onTap: () => Navigator.pop(context),
+    );
+  }
+
+  void _showPrivacySettingsDialog(BuildContext context) {
+    bool shareData = true;
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text(
+            'Privacy Settings',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SwitchListTile.adaptive(
+                title: const Text(
+                  'Share usage data',
+                  style: TextStyle(fontSize: 14),
+                ),
+                subtitle: const Text(
+                  'Help us improve EcoSathi by sharing anonymous usage data.',
+                  style: TextStyle(fontSize: 12),
+                ),
+                value: shareData,
+                onChanged: (val) => setDialogState(() => shareData = val),
+                activeColor: AppColors.primary,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Close'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _launchUrl(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri)) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Could not launch $url')));
+      }
+    }
   }
 }

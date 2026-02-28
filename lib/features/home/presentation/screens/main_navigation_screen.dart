@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../orders/presentation/screens/orders_list_screen.dart';
+import '../../../profile/presentation/screens/wallet_screen.dart';
 import '../../../pickup/presentation/screens/user_home_screen.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
 
@@ -15,8 +17,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   final List<Widget> _screens = [
     const UserHomeScreen(),
-    const Center(child: Text('My History')),
-    const Center(child: Text('Wallet')),
+    const OrdersListScreen(),
+    const WalletScreen(),
     const ProfileScreen(),
   ];
 

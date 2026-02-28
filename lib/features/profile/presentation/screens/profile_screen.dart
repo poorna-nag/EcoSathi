@@ -9,6 +9,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../features/orders/presentation/screens/orders_list_screen.dart';
 import 'settings_screen.dart';
 import 'support_chat_screen.dart';
+import 'wallet_screen.dart';
+import 'address_list_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -212,17 +214,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       },
                     ),
                     _buildProfileOption(
+                      icon: Icons.account_balance_wallet_outlined,
+                      title: 'Wallet',
+                      subtitle: 'View your earnings and transactions',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const WalletScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    _buildProfileOption(
                       icon: Icons.mail_outline_rounded,
                       title: 'Inbox',
                       subtitle: 'Messages and notifications',
                       onTap: () {},
                       badge: '2', // Sample badge for unique UI
                     ),
+
                     _buildProfileOption(
                       icon: Icons.location_on_outlined,
                       title: 'My Addresses',
                       subtitle: 'Saved locations for pickup',
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AddressListScreen(),
+                          ),
+                        );
+                      },
                     ),
                   ]),
 
@@ -407,6 +430,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Widget? trailing,
   }) {
     return ListTile(
+      onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
       leading: Container(
         padding: const EdgeInsets.all(10),
@@ -513,7 +537,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               subtitle: 'Available 9 AM - 6 PM',
               color: Colors.blue,
               onTap: () async {
-                final Uri launchUri = Uri(scheme: 'tel', path: '+919876543210');
+                final Uri launchUri = Uri(scheme: 'tel', path: '7619405844');
                 if (await canLaunchUrl(launchUri)) {
                   await launchUrl(launchUri);
                 }
