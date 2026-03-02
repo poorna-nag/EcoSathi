@@ -407,6 +407,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
+              minimumSize: const Size(100, 44),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),

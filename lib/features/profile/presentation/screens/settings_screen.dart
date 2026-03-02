@@ -9,6 +9,8 @@ import 'edit_profile_screen.dart';
 import 'change_password_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../../core/localization/language_cubit.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -27,9 +29,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          'Settings',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          AppLocalizations.of(context)!.settings,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_rounded),
@@ -47,7 +49,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildSettingsGroup('ACCOUNT', [
                   _buildSettingsTile(
                     icon: Icons.person_outline_rounded,
-                    title: 'Edit Profile',
+                    title: AppLocalizations.of(context)!.editProfile,
                     onTap: () {
                       if (user != null) {
                         Navigator.push(
@@ -65,7 +67,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   _buildSettingsTile(
                     icon: Icons.lock_outline_rounded,
-                    title: 'Change Password',
+                    title: AppLocalizations.of(context)!.changePassword,
                     onTap: () {
                       Navigator.push(
                         context,
@@ -77,21 +79,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   _buildSettingsTile(
                     icon: Icons.security_outlined,
-                    title: 'Privacy Settings',
+                    title: AppLocalizations.of(context)!.privacySettings,
                     onTap: () => _showPrivacySettingsDialog(context),
                   ),
                 ]),
                 _buildSettingsGroup('NOTIFICATIONS', [
                   _buildToggleTile(
                     icon: Icons.notifications_none_rounded,
-                    title: 'Push Notifications',
+                    title: AppLocalizations.of(context)!.pushNotifications,
                     value: _pushNotifications,
                     onChanged: (val) =>
                         setState(() => _pushNotifications = val),
                   ),
                   _buildToggleTile(
                     icon: Icons.alternate_email_rounded,
-                    title: 'Email Notifications',
+                    title: AppLocalizations.of(context)!.emailNotifications,
                     value: _emailAlerts,
                     onChanged: (val) => setState(() => _emailAlerts = val),
                   ),
@@ -105,10 +107,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   _buildSettingsTile(
                     icon: Icons.language_rounded,
-                    title: 'Language',
-                    trailing: const Text(
-                      'English',
-                      style: TextStyle(
+                    title: AppLocalizations.of(context)!.language,
+                    trailing: Text(
+                      _getLanguageName(context),
+                      style: const TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,
                       ),
@@ -119,16 +121,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildSettingsGroup('ABOUT', [
                   _buildSettingsTile(
                     icon: Icons.info_outline_rounded,
-                    title: 'Privacy Policy',
+                    title: AppLocalizations.of(context)!.privacyPolicy,
                     onTap: () => _launchUrl('https://ecosathi.com/privacy'),
                   ),
                   _buildSettingsTile(
                     icon: Icons.description_outlined,
-                    title: 'Terms of Service',
+                    title: AppLocalizations.of(context)!.termsOfService,
                     onTap: () => _launchUrl('https://ecosathi.com/terms'),
                   ),
-                  const ListTile(
-                    title: Text('App Version', style: TextStyle(fontSize: 14)),
+                  ListTile(
+                    title: Text(
+                      AppLocalizations.of(context)!.appVersion,
+                      style: const TextStyle(fontSize: 14),
+                    ),
                     trailing: Text(
                       '1.0.0',
                       style: TextStyle(color: AppColors.textHint),
@@ -148,14 +153,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       padding: const EdgeInsets.all(16),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.delete_outline_rounded),
-                        SizedBox(width: 8),
+                        const Icon(Icons.delete_outline_rounded),
+                        const SizedBox(width: 8),
                         Text(
-                          'Delete Account',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          AppLocalizations.of(context)!.deleteAccount,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -243,7 +248,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       trailing: Switch.adaptive(
         value: value,
         onChanged: onChanged,
-        activeColor: AppColors.primary,
+        activeTrackColor: AppColors.primary,
       ),
     );
   }
@@ -320,22 +325,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         children: [
-          _buildLanguageOption('English', true),
-          _buildLanguageOption('Hindi', false),
-          _buildLanguageOption('Kannada', false),
-          _buildLanguageOption('Telugu', false),
+          _buildLanguageOption(
+            AppLocalizations.of(context)!.english,
+            Localizations.localeOf(context).languageCode == 'en',
+            'en',
+          ),
+          _buildLanguageOption(
+            AppLocalizations.of(context)!.kannada,
+            Localizations.localeOf(context).languageCode == 'kn',
+            'kn',
+          ),
+          _buildLanguageOption(
+            AppLocalizations.of(context)!.hindi,
+            Localizations.localeOf(context).languageCode == 'hi',
+            'hi',
+          ),
+          _buildLanguageOption(
+            AppLocalizations.of(context)!.telugu,
+            Localizations.localeOf(context).languageCode == 'te',
+            'te',
+          ),
+          _buildLanguageOption(
+            AppLocalizations.of(context)!.tamil,
+            Localizations.localeOf(context).languageCode == 'ta',
+            'ta',
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildLanguageOption(String title, bool isSelected) {
+  Widget _buildLanguageOption(String title, bool isSelected, String code) {
     return ListTile(
       title: Text(title),
       trailing: isSelected
           ? const Icon(Icons.check_circle, color: AppColors.primary)
           : null,
-      onTap: () => Navigator.pop(context),
+      onTap: () {
+        context.read<LanguageCubit>().changeLanguage(code);
+        Navigator.pop(context);
+      },
     );
   }
 
@@ -363,7 +392,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 value: shareData,
                 onChanged: (val) => setDialogState(() => shareData = val),
-                activeColor: AppColors.primary,
+                activeTrackColor: AppColors.primary,
               ),
             ],
           ),
@@ -376,6 +405,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ),
     );
+  }
+
+  String _getLanguageName(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    switch (code) {
+      case 'kn':
+        return AppLocalizations.of(context)!.kannada;
+      case 'hi':
+        return AppLocalizations.of(context)!.hindi;
+      case 'te':
+        return AppLocalizations.of(context)!.telugu;
+      case 'ta':
+        return AppLocalizations.of(context)!.tamil;
+      default:
+        return AppLocalizations.of(context)!.english;
+    }
   }
 
   Future<void> _launchUrl(String url) async {

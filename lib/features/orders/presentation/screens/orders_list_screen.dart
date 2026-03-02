@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../pickup/data/models/pickup_model.dart';
-import '../../../pickup/data/repositories/pickup_repository.dart';
-import 'pickup_tracking_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:ecosathi/core/constants/app_colors.dart';
+import 'package:ecosathi/features/pickup/data/models/pickup_model.dart';
+import 'package:ecosathi/features/orders/presentation/bloc/orders_bloc.dart';
+import 'package:ecosathi/features/orders/presentation/bloc/orders_event.dart';
+import 'package:ecosathi/features/orders/presentation/bloc/orders_state.dart';
+import 'pickup_tracking_screen.dart';
 
 class OrdersListScreen extends StatefulWidget {
   const OrdersListScreen({super.key});
@@ -13,32 +16,14 @@ class OrdersListScreen extends StatefulWidget {
 }
 
 class _OrdersListScreenState extends State<OrdersListScreen> {
-  final PickupRepository _pickupRepository = PickupRepository();
-  List<PickupModel> _pickups = [];
-  bool _isLoading = true;
-
   @override
   void initState() {
     super.initState();
-    _fetchPickups();
-  }
-
-  Future<void> _fetchPickups() async {
-    setState(() => _isLoading = true);
-    try {
-      final pickups = await _pickupRepository.getPickups();
-      setState(() {
-        _pickups = pickups;
-        _isLoading = false;
-      });
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error fetching history: $e')));
-      }
-    }
+    // Assuming we need current user ID, but the BLoC usually handles this via AuthBloc or Repo
+    // For now, let's just trigger the event. In a real app, we'd pass the UID or let the Repo get it.
+    context.read<OrdersBloc>().add(
+      const LoadUserOrdersEvent('current_user_id'),
+    );
   }
 
   @override
@@ -55,48 +40,54 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: RefreshIndicator(
-        onRefresh: _fetchPickups,
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : _pickups.isEmpty
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.history_rounded,
-                      size: 64,
-                      color: AppColors.textHint.withOpacity(0.5),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'No history found yet',
-                      style: TextStyle(color: AppColors.textSecondary),
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: _fetchPickups,
-                      child: const Text('Refresh'),
-                    ),
-                  ],
-                ),
-              )
-            : ListView.builder(
-                padding: const EdgeInsets.all(24),
-                itemCount: _pickups.length,
-                itemBuilder: (context, index) {
-                  final pickup = _pickups[index];
-                  return _buildPickupCard(context, pickup);
-                },
+      body: BlocBuilder<OrdersBloc, OrdersState>(
+        builder: (context, state) {
+          if (state is OrdersLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (state is OrdersError) {
+            return Center(child: Text(state.message));
+          }
+
+          final orders = state is OrdersLoaded ? state.orders : <PickupModel>[];
+
+          if (orders.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.history_rounded,
+                    size: 64,
+                    color: AppColors.textHint.withValues(alpha: 0.5),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'No history found yet',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
+                ],
               ),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () async => context.read<OrdersBloc>().add(
+              const LoadUserOrdersEvent('current_user_id'),
+            ),
+            child: ListView.builder(
+              padding: const EdgeInsets.all(24),
+              itemCount: orders.length,
+              itemBuilder: (context, index) =>
+                  _buildPickupCard(context, orders[index]),
+            ),
+          );
+        },
       ),
     );
   }
 
   Widget _buildPickupCard(BuildContext context, PickupModel pickup) {
-    final isCompleted = pickup.status == PickupStatus.completed;
-
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
@@ -104,7 +95,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -114,14 +105,12 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(24),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => PickupTrackingScreen(pickup: pickup),
-              ),
-            );
-          },
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PickupTrackingScreen(pickup: pickup),
+            ),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -132,7 +121,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
+                        color: AppColors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: const Icon(
@@ -154,7 +143,6 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                               color: AppColors.textPrimary,
                             ),
                           ),
-                          const SizedBox(height: 2),
                           Text(
                             DateFormat(
                               'MMM dd, yyyy • hh:mm a',
@@ -170,16 +158,13 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                     _buildStatusBadge(pickup.status),
                   ],
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  child: Divider(height: 1),
-                ),
+                const Divider(height: 32),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _buildDetailItem(
-                      'Est. Weight',
-                      '${pickup.estimatedWeight} kg',
+                      'Weight',
+                      '${pickup.finalWeight ?? pickup.estimatedWeight} kg',
                       Icons.line_weight_rounded,
                     ),
                     _buildDetailItem(
@@ -188,43 +173,12 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                       Icons.currency_rupee_rounded,
                     ),
                     _buildDetailItem(
-                      'Est. Total',
-                      '₹${(pickup.estimatedWeight * pickup.ratePerKg).toStringAsFixed(2)}',
+                      'Total',
+                      '₹${((pickup.finalWeight ?? pickup.estimatedWeight) * pickup.ratePerKg).toStringAsFixed(2)}',
                       Icons.account_balance_wallet_rounded,
                     ),
                   ],
                 ),
-                if (!isCompleted &&
-                    pickup.status != PickupStatus.cancelled) ...[
-                  const SizedBox(height: 16),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.track_changes_rounded,
-                          size: 14,
-                          color: AppColors.primary,
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          'Tap to track live status',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
               ],
             ),
           ),
@@ -264,29 +218,21 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
   }
 
   Widget _buildStatusBadge(PickupStatus status) {
-    Color color;
-    switch (status) {
-      case PickupStatus.pending:
-        color = AppColors.warning;
-        break;
-      case PickupStatus.assigned:
-        color = Colors.blue;
-        break;
-      case PickupStatus.picked:
-        color = Colors.purple;
-        break;
-      case PickupStatus.completed:
-        color = AppColors.success;
-        break;
-      case PickupStatus.cancelled:
-        color = AppColors.error;
-        break;
+    Color color = Colors.grey;
+    if (status == PickupStatus.completed) {
+      color = AppColors.success;
+    } else if (status == PickupStatus.pending) {
+      color = AppColors.warning;
+    } else if (status == PickupStatus.cancelled) {
+      color = AppColors.error;
+    } else {
+      color = Colors.blue;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(

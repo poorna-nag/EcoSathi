@@ -1,0 +1,127 @@
+Analyzing ecosathi...                                           
+
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/presentation/screens/login_screen.dart:51:44 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/presentation/screens/onboarding_screen.dart:132:31 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/presentation/screens/role_selection_screen.dart:19:40 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/presentation/screens/role_selection_screen.dart:94:28 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/presentation/screens/role_selection_screen.dart:99:43 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/presentation/screens/role_selection_screen.dart:106:30 • deprecated_member_use
+  error • The name 'UserHomeScreen' isn't a class • lib/features/home/presentation/screens/main_navigation_screen.dart:19:11 • creation_with_non_type
+  error • Undefined class 'OrdersRepository' • lib/features/orders/presentation/bloc/orders_bloc.dart:7:9 • undefined_class
+   info • Statements in an if should be enclosed in a block • lib/features/orders/presentation/screens/orders_list_screen.dart:46:13 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/orders/presentation/screens/orders_list_screen.dart:59:47 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/orders/presentation/screens/orders_list_screen.dart:95:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/orders/presentation/screens/orders_list_screen.dart:121:50 • deprecated_member_use
+   info • Statements in an if should be enclosed in a block • lib/features/orders/presentation/screens/orders_list_screen.dart:220:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/features/orders/presentation/screens/orders_list_screen.dart:222:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/features/orders/presentation/screens/orders_list_screen.dart:224:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/features/orders/presentation/screens/orders_list_screen.dart:226:7 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/orders/presentation/screens/orders_list_screen.dart:231:22 • deprecated_member_use
+warning • Unused import: '../models/partner_model.dart' • lib/features/partner/data/repositories/partner_repository.dart:1:8 • unused_import
+  error • The name 'PartnerModel' isn't a type, so it can't be used as a type argument • lib/features/partner/data/repositories/partner_repository.dart:5:10 • non_type_as_type_argument
+warning • Unused import: 'package:ecosathi/features/partner/presentation/bloc/partner_bloc.dart' • lib/features/partner/presentation/screens/partner_home_screen.dart:4:8 • unused_import
+warning • Unused import: 'package:ecosathi/features/partner/presentation/bloc/partner_event.dart' • lib/features/partner/presentation/screens/partner_home_screen.dart:5:8 • unused_import
+warning • Unused import: 'package:ecosathi/features/partner/presentation/bloc/partner_state.dart' • lib/features/partner/presentation/screens/partner_home_screen.dart:6:8 • unused_import
+  error • The name 'PartnerBloc' isn't a type, so it can't be used as a type argument • lib/features/partner/presentation/screens/partner_home_screen.dart:20:18 • non_type_as_type_argument
+  error • The method 'LoadPartnerProfileEvent' isn't defined for the type '_PartnerHomeScreenState' • lib/features/partner/presentation/screens/partner_home_screen.dart:20:37 • undefined_method
+  error • The name 'PartnerBloc' isn't a type, so it can't be used as a type argument • lib/features/partner/presentation/screens/partner_home_screen.dart:21:18 • non_type_as_type_argument
+  error • The method 'LoadNearbyRequestsEvent' isn't defined for the type '_PartnerHomeScreenState' • lib/features/partner/presentation/screens/partner_home_screen.dart:21:37 • undefined_method
+  error • The name 'PartnerBloc' isn't a type, so it can't be used as a type argument • lib/features/partner/presentation/screens/partner_home_screen.dart:28:25 • non_type_as_type_argument
+  error • The name 'PartnerState' isn't a type, so it can't be used as a type argument • lib/features/partner/presentation/screens/partner_home_screen.dart:28:38 • non_type_as_type_argument
+  error • The name 'PartnerProfileLoaded' isn't defined, so it can't be used in an 'is' expression • lib/features/partner/presentation/screens/partner_home_screen.dart:30:36 • type_test_with_undefined_name
+  error • The property 'partner' can't be unconditionally accessed because the receiver can be 'null' • lib/features/partner/presentation/screens/partner_home_screen.dart:30:65 • unchecked_use_of_nullable_value
+warning • Dead code • lib/features/partner/presentation/screens/partner_home_screen.dart:30:75 • dead_code
+  error • The name 'NearbyRequestsLoaded' isn't defined, so it can't be used in an 'is' expression • lib/features/partner/presentation/screens/partner_home_screen.dart:31:37 • type_test_with_undefined_name
+  error • The property 'requests' can't be unconditionally accessed because the receiver can be 'null' • lib/features/partner/presentation/screens/partner_home_screen.dart:32:23 • unchecked_use_of_nullable_value
+warning • Dead code • lib/features/partner/presentation/screens/partner_home_screen.dart:33:17 • dead_code
+  error • The name 'PartnerBloc' isn't a type, so it can't be used as a type argument • lib/features/partner/presentation/screens/partner_home_screen.dart:38:30 • non_type_as_type_argument
+  error • The method 'LoadPartnerProfileEvent' isn't defined for the type '_PartnerHomeScreenState' • lib/features/partner/presentation/screens/partner_home_screen.dart:38:49 • undefined_method
+  error • The name 'PartnerBloc' isn't a type, so it can't be used as a type argument • lib/features/partner/presentation/screens/partner_home_screen.dart:39:30 • non_type_as_type_argument
+  error • The method 'LoadNearbyRequestsEvent' isn't defined for the type '_PartnerHomeScreenState' • lib/features/partner/presentation/screens/partner_home_screen.dart:39:49 • undefined_method
+  error • The name 'PartnerBloc' isn't a type, so it can't be used as a type argument • lib/features/partner/presentation/screens/partner_home_screen.dart:129:37 • non_type_as_type_argument
+  error • The method 'ToggleOnlineStatusEvent' isn't defined for the type '_PartnerHomeScreenState' • lib/features/partner/presentation/screens/partner_home_screen.dart:130:13 • undefined_method
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/partner/presentation/screens/partner_home_screen.dart:135:67 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/partner/presentation/screens/partner_home_screen.dart:175:40 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/partner/presentation/screens/partner_home_screen.dart:254:35 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/partner/presentation/screens/partner_home_screen.dart:286:48 • deprecated_member_use
+  error • The name 'PartnerBloc' isn't a type, so it can't be used as a type argument • lib/features/partner/presentation/screens/partner_home_screen.dart:377:49 • non_type_as_type_argument
+  error • The method 'AcceptPickupEvent' isn't defined for the type '_PartnerHomeScreenState' • lib/features/partner/presentation/screens/partner_home_screen.dart:378:21 • undefined_method
+  error • Classes and mixins can only implement other classes and mixins • lib/features/pickup/data/repository_implementations/pickup_repository_impl.dart:6:39 • implements_non_class
+warning • The method doesn't override an inherited method • lib/features/pickup/data/repository_implementations/pickup_repository_impl.dart:15:29 • override_on_non_overriding_member
+warning • The method doesn't override an inherited method • lib/features/pickup/data/repository_implementations/pickup_repository_impl.dart:36:16 • override_on_non_overriding_member
+warning • The method doesn't override an inherited method • lib/features/pickup/data/repository_implementations/pickup_repository_impl.dart:47:16 • override_on_non_overriding_member
+warning • The method doesn't override an inherited method • lib/features/pickup/data/repository_implementations/pickup_repository_impl.dart:52:24 • override_on_non_overriding_member
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/pickup/presentation/screens/guidelines_screen.dart:90:57 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/pickup/presentation/screens/guidelines_screen.dart:97:38 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/pickup/presentation/screens/guidelines_screen.dart:137:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/pickup/presentation/screens/guidelines_screen.dart:151:32 • deprecated_member_use
+warning • Unused import: 'package:ecosathi/features/pickup/presentation/bloc/pickup_bloc.dart' • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:8:8 • unused_import
+warning • Unused import: 'package:ecosathi/features/pickup/presentation/bloc/pickup_event.dart' • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:9:8 • unused_import
+warning • Unused import: 'package:ecosathi/features/pickup/presentation/bloc/pickup_state.dart' • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:10:8 • unused_import
+   info • Statements in an if should be enclosed in a block • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:66:11 • curly_braces_in_flow_control_structures
+  error • The name 'PickupBloc' isn't a type, so it can't be used as a type argument • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:100:25 • non_type_as_type_argument
+  error • The name 'PickupState' isn't a type, so it can't be used as a type argument • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:100:37 • non_type_as_type_argument
+  error • The name 'PickupRequestSuccess' isn't defined, so it can't be used in an 'is' expression • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:102:22 • type_test_with_undefined_name
+warning • Dead code • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:110:16 • dead_code
+  error • The name 'PickupError' isn't defined, so it can't be used in an 'is' expression • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:110:29 • type_test_with_undefined_name
+  error • The property 'message' can't be unconditionally accessed because the receiver can be 'null' • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:113:35 • unchecked_use_of_nullable_value
+   info • Statements in an if should be enclosed in a block • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:177:33 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:179:33 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:226:31 • curly_braces_in_flow_control_structures
+  error • The name 'PickupBloc' isn't a type, so it can't be used as a type argument • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:280:25 • non_type_as_type_argument
+  error • The name 'PickupState' isn't a type, so it can't be used as a type argument • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:280:37 • non_type_as_type_argument
+  error • The name 'PickupLoading' isn't defined, so it can't be used in an 'is' expression • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:282:43 • type_test_with_undefined_name
+warning • Dead code • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:289:27 • dead_code
+  error • The name 'PickupBloc' isn't a type, so it can't be used as a type argument • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:326:42 • non_type_as_type_argument
+  error • The method 'RequestPickupEvent' isn't defined for the type '_RequestPickupSheetState' • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:327:31 • undefined_method
+warning • Dead code • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:339:27 • dead_code
+warning • Unused import: 'package:ecosathi/features/profile/presentation/bloc/profile_bloc.dart' • lib/features/profile/presentation/screens/address_list_screen.dart:5:8 • unused_import
+warning • Unused import: 'package:ecosathi/features/profile/presentation/bloc/profile_event.dart' • lib/features/profile/presentation/screens/address_list_screen.dart:6:8 • unused_import
+warning • Unused import: 'package:ecosathi/features/profile/presentation/bloc/profile_state.dart' • lib/features/profile/presentation/screens/address_list_screen.dart:7:8 • unused_import
+  error • The name 'ProfileBloc' isn't a type, so it can't be used as a type argument • lib/features/profile/presentation/screens/address_list_screen.dart:21:18 • non_type_as_type_argument
+  error • The method 'LoadProfileEvent' isn't defined for the type '_AddressListScreenState' • lib/features/profile/presentation/screens/address_list_screen.dart:21:37 • undefined_method
+  error • The name 'ProfileBloc' isn't a type, so it can't be used as a type argument • lib/features/profile/presentation/screens/address_list_screen.dart:38:26 • non_type_as_type_argument
+  error • The name 'ProfileState' isn't a type, so it can't be used as a type argument • lib/features/profile/presentation/screens/address_list_screen.dart:38:39 • non_type_as_type_argument
+  error • The name 'ProfileError' isn't defined, so it can't be used in an 'is' expression • lib/features/profile/presentation/screens/address_list_screen.dart:40:24 • type_test_with_undefined_name
+  error • The property 'message' can't be unconditionally accessed because the receiver can be 'null' • lib/features/profile/presentation/screens/address_list_screen.dart:43:37 • unchecked_use_of_nullable_value
+  error • The name 'ProfileLoading' isn't defined, so it can't be used in an 'is' expression • lib/features/profile/presentation/screens/address_list_screen.dart:50:24 • type_test_with_undefined_name
+   info • Statements in an if should be enclosed in a block • lib/features/profile/presentation/screens/address_list_screen.dart:51:13 • curly_braces_in_flow_control_structures
+warning • Dead code • lib/features/profile/presentation/screens/address_list_screen.dart:53:11 • dead_code
+  error • The name 'ProfileLoaded' isn't defined, so it can't be used in an 'is' expression • lib/features/profile/presentation/screens/address_list_screen.dart:54:24 • type_test_with_undefined_name
+  error • The property 'addresses' can't be unconditionally accessed because the receiver can be 'null' • lib/features/profile/presentation/screens/address_list_screen.dart:55:31 • unchecked_use_of_nullable_value
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/profile/presentation/screens/address_list_screen.dart:66:47 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/profile/presentation/screens/address_list_screen.dart:105:51 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/profile/presentation/screens/address_list_screen.dart:109:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/profile/presentation/screens/address_list_screen.dart:130:46 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/profile/presentation/screens/address_list_screen.dart:162:58 • deprecated_member_use
+   info • Statements in an if should be enclosed in a block • lib/features/profile/presentation/screens/address_list_screen.dart:193:25 • curly_braces_in_flow_control_structures
+  error • The name 'ProfileBloc' isn't a type, so it can't be used as a type argument • lib/features/profile/presentation/screens/address_list_screen.dart:193:38 • non_type_as_type_argument
+  error • The method 'DeleteAddressEvent' isn't defined for the type '_AddressListScreenState' • lib/features/profile/presentation/screens/address_list_screen.dart:194:27 • undefined_method
+   info • Statements in an if should be enclosed in a block • lib/features/profile/presentation/screens/address_list_screen.dart:197:25 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/features/profile/presentation/screens/address_list_screen.dart:285:33 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/features/profile/presentation/screens/address_list_screen.dart:343:25 • curly_braces_in_flow_control_structures
+  error • The name 'ProfileBloc' isn't a type, so it can't be used as a type argument • lib/features/profile/presentation/screens/address_list_screen.dart:357:36 • non_type_as_type_argument
+  error • The method 'AddAddressEvent' isn't defined for the type '_AddressListScreenState' • lib/features/profile/presentation/screens/address_list_screen.dart:358:25 • undefined_method
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor or activeTrackColor instead. This feature was deprecated after v3.31.0-2.0.pre • lib/features/profile/presentation/screens/settings_screen.dart:246:9 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor or activeTrackColor instead. This feature was deprecated after v3.31.0-2.0.pre • lib/features/profile/presentation/screens/settings_screen.dart:366:17 • deprecated_member_use
+warning • Unused import: 'package:ecosathi/features/pickup/presentation/bloc/pickup_bloc.dart' • lib/features/profile/presentation/screens/wallet_screen.dart:6:8 • unused_import
+warning • Unused import: 'package:ecosathi/features/pickup/presentation/bloc/pickup_event.dart' • lib/features/profile/presentation/screens/wallet_screen.dart:7:8 • unused_import
+warning • Unused import: 'package:ecosathi/features/pickup/presentation/bloc/pickup_state.dart' • lib/features/profile/presentation/screens/wallet_screen.dart:8:8 • unused_import
+  error • The name 'PickupBloc' isn't a type, so it can't be used as a type argument • lib/features/profile/presentation/screens/wallet_screen.dart:21:18 • non_type_as_type_argument
+  error • The method 'LoadPickupsEvent' isn't defined for the type '_WalletScreenState' • lib/features/profile/presentation/screens/wallet_screen.dart:21:36 • undefined_method
+  error • The name 'PickupBloc' isn't a type, so it can't be used as a type argument • lib/features/profile/presentation/screens/wallet_screen.dart:38:25 • non_type_as_type_argument
+  error • The name 'PickupState' isn't a type, so it can't be used as a type argument • lib/features/profile/presentation/screens/wallet_screen.dart:38:37 • non_type_as_type_argument
+  error • The name 'PickupsLoaded' isn't defined, so it can't be used in an 'is' expression • lib/features/profile/presentation/screens/wallet_screen.dart:40:36 • type_test_with_undefined_name
+  error • The property 'pickups' can't be unconditionally accessed because the receiver can be 'null' • lib/features/profile/presentation/screens/wallet_screen.dart:41:23 • unchecked_use_of_nullable_value
+warning • Dead code • lib/features/profile/presentation/screens/wallet_screen.dart:42:17 • dead_code
+  error • The name 'PickupLoading' isn't defined, so it can't be used in an 'is' expression • lib/features/profile/presentation/screens/wallet_screen.dart:60:24 • type_test_with_undefined_name
+  error • The name 'PickupBloc' isn't a type, so it can't be used as a type argument • lib/features/profile/presentation/screens/wallet_screen.dart:66:30 • non_type_as_type_argument
+  error • The method 'LoadPickupsEvent' isn't defined for the type '_WalletScreenState' • lib/features/profile/presentation/screens/wallet_screen.dart:66:48 • undefined_method
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/profile/presentation/screens/wallet_screen.dart:102:38 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/profile/presentation/screens/wallet_screen.dart:124:39 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/profile/presentation/screens/wallet_screen.dart:186:46 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/profile/presentation/screens/wallet_screen.dart:226:39 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/profile/presentation/screens/wallet_screen.dart:287:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/profile/presentation/screens/wallet_screen.dart:311:42 • deprecated_member_use
+  error • The name 'EcoSathiApp' isn't a class • test/widget_test.dart:16:35 • creation_with_non_type
+

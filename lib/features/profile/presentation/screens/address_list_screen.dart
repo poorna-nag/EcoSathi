@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../pickup/data/repositories/address_repository.dart';
-import '../../../pickup/data/models/address_model.dart';
-import '../../../../core/constants/app_colors.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ecosathi/core/constants/app_colors.dart';
+import 'package:ecosathi/features/pickup/data/models/address_model.dart';
+import 'package:ecosathi/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ecosathi/features/profile/presentation/bloc/profile_event.dart';
+import 'package:ecosathi/features/profile/presentation/bloc/profile_state.dart';
 
 class AddressListScreen extends StatefulWidget {
   final bool selectMode;
@@ -12,32 +15,10 @@ class AddressListScreen extends StatefulWidget {
 }
 
 class _AddressListScreenState extends State<AddressListScreen> {
-  final AddressRepository _addressRepository = AddressRepository();
-  List<AddressModel> _savedAddresses = [];
-  bool _isLoading = true;
-
   @override
   void initState() {
     super.initState();
-    _fetchAddresses();
-  }
-
-  Future<void> _fetchAddresses() async {
-    setState(() => _isLoading = true);
-    try {
-      final addresses = await _addressRepository.getAddresses();
-      setState(() {
-        _savedAddresses = addresses;
-        _isLoading = false;
-      });
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error fetching addresses: $e')));
-      }
-    }
+    context.read<ProfileBloc>().add(const LoadProfileEvent());
   }
 
   @override
@@ -54,17 +35,36 @@ class _AddressListScreenState extends State<AddressListScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _savedAddresses.isEmpty
-          ? Center(
+      body: BlocConsumer<ProfileBloc, ProfileState>(
+        listener: (context, state) {
+          if (state is ProfileError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          if (state is ProfileLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          List<AddressModel> addresses = [];
+          if (state is ProfileLoaded) {
+            addresses = state.addresses;
+          }
+
+          if (addresses.isEmpty) {
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     Icons.location_off_rounded,
                     size: 64,
-                    color: AppColors.textHint.withOpacity(0.5),
+                    color: AppColors.textHint.withValues(alpha: 0.5),
                   ),
                   const SizedBox(height: 16),
                   const Text(
@@ -73,15 +73,17 @@ class _AddressListScreenState extends State<AddressListScreen> {
                   ),
                 ],
               ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(24),
-              itemCount: _savedAddresses.length,
-              itemBuilder: (context, index) {
-                final address = _savedAddresses[index];
-                return _buildAddressCard(address);
-              },
-            ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(24),
+            itemCount: addresses.length,
+            itemBuilder: (context, index) =>
+                _buildAddressCard(addresses[index]),
+          );
+        },
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddressDialog(context),
         backgroundColor: AppColors.primary,
@@ -101,11 +103,14 @@ class _AddressListScreenState extends State<AddressListScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
         border: address.isDefault
-            ? Border.all(color: AppColors.primary.withOpacity(0.5), width: 2)
+            ? Border.all(
+                color: AppColors.primary.withValues(alpha: 0.5),
+                width: 2,
+              )
             : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -116,9 +121,7 @@ class _AddressListScreenState extends State<AddressListScreen> {
         child: InkWell(
           borderRadius: BorderRadius.circular(24),
           onTap: () {
-            if (widget.selectMode) {
-              Navigator.pop(context, address.address);
-            }
+            if (widget.selectMode) Navigator.pop(context, address.address);
           },
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -128,7 +131,7 @@ class _AddressListScreenState extends State<AddressListScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(
@@ -160,7 +163,7 @@ class _AddressListScreenState extends State<AddressListScreen> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.primary.withOpacity(0.1),
+                                color: AppColors.primary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: const Text(
@@ -189,61 +192,16 @@ class _AddressListScreenState extends State<AddressListScreen> {
                 ),
                 if (!widget.selectMode)
                   PopupMenuButton<String>(
-                    icon: const Icon(
-                      Icons.more_vert,
-                      color: AppColors.textHint,
-                    ),
-                    onSelected: (value) async {
+                    onSelected: (value) {
                       if (value == 'delete') {
-                        final confirmed = await showDialog<bool>(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('Delete Address'),
-                            content: const Text(
-                              'Are you sure you want to delete this address?',
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context, false),
-                                child: const Text('Cancel'),
-                                style: TextButton.styleFrom(
-                                  foregroundColor: AppColors.textSecondary,
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () => Navigator.pop(context, true),
-                                child: const Text('Delete'),
-                                style: TextButton.styleFrom(
-                                  foregroundColor: AppColors.error,
-                                ),
-                              ),
-                            ],
-                          ),
+                        context.read<ProfileBloc>().add(
+                          DeleteAddressEvent(address.id),
                         );
-                        if (confirmed == true) {
-                          try {
-                            await _addressRepository.deleteAddress(address.id);
-                            _fetchAddresses();
-                          } catch (e) {
-                            if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Error: $e')),
-                              );
-                            }
-                          }
-                        }
-                      } else if (value == 'default') {
-                        await _addressRepository.setDefaultAddress(address.id);
-                        _fetchAddresses();
                       } else if (value == 'edit') {
                         _showAddressDialog(context, address: address);
                       }
                     },
                     itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'default',
-                        child: Text('Set as Default'),
-                      ),
                       const PopupMenuItem(value: 'edit', child: Text('Edit')),
                       const PopupMenuItem(
                         value: 'delete',
@@ -268,10 +226,8 @@ class _AddressListScreenState extends State<AddressListScreen> {
         return Icons.home_rounded;
       case 'work':
         return Icons.business_rounded;
-      case 'other':
-        return Icons.location_on_rounded;
       default:
-        return Icons.location_city_rounded;
+        return Icons.location_on_rounded;
     }
   }
 
@@ -281,9 +237,7 @@ class _AddressListScreenState extends State<AddressListScreen> {
     final landmarkController = TextEditingController(text: address?.landmark);
     final cityController = TextEditingController(text: address?.city);
     final zipController = TextEditingController(text: address?.zipCode);
-
     String currentLabelType = address?.label ?? 'Home';
-    final List<String> labelOptions = ['Home', 'Work', 'Other'];
 
     showModalBottomSheet(
       context: context,
@@ -323,177 +277,106 @@ class _AddressListScreenState extends State<AddressListScreen> {
                   ],
                 ),
                 const SizedBox(height: 24),
-                const Text(
-                  'Address Label',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                ),
-                const SizedBox(height: 12),
                 Row(
-                  children: labelOptions.map((label) {
-                    final isSelected = currentLabelType == label;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 12),
-                      child: ChoiceChip(
-                        label: Text(label),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          if (selected) {
-                            setModalState(() {
-                              currentLabelType = label;
-                            });
-                          }
-                        },
-                        selectedColor: AppColors.primary.withOpacity(0.2),
-                        checkmarkColor: AppColors.primary,
-                        labelStyle: TextStyle(
-                          color: isSelected
-                              ? AppColors.primary
-                              : AppColors.textSecondary,
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.normal,
+                  children: ['Home', 'Work', 'Other']
+                      .map(
+                        (label) => Padding(
+                          padding: const EdgeInsets.only(right: 12),
+                          child: ChoiceChip(
+                            label: Text(label),
+                            selected: currentLabelType == label,
+                            onSelected: (selected) {
+                              if (selected) {
+                                setModalState(() => currentLabelType = label);
+                              }
+                            },
+                          ),
                         ),
-                      ),
-                    );
-                  }).toList(),
+                      )
+                      .toList(),
                 ),
                 const SizedBox(height: 24),
-                _buildFieldLabel('Flat / House No / Floor'),
                 _buildTextField(
                   houseNoController,
-                  'E.g. Flat 101, 1st Floor',
+                  'Flat / House No',
                   Icons.home_work_outlined,
                 ),
                 const SizedBox(height: 16),
-
-                _buildFieldLabel('Street / Area / Colony'),
                 _buildTextField(
                   streetController,
-                  'E.g. MG Road, Indiranagar',
+                  'Street / Area',
                   Icons.streetview_outlined,
                 ),
                 const SizedBox(height: 16),
-
-                _buildFieldLabel('Landmark'),
                 _buildTextField(
                   landmarkController,
-                  'E.g. Near Apollo Hospital',
+                  'Landmark',
                   Icons.location_on_outlined,
                 ),
                 const SizedBox(height: 16),
-
                 Row(
                   children: [
                     Expanded(
                       flex: 2,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildFieldLabel('City'),
-                          _buildTextField(
-                            cityController,
-                            'E.g. Bangalore',
-                            Icons.location_city_outlined,
-                          ),
-                        ],
+                      child: _buildTextField(
+                        cityController,
+                        'City',
+                        Icons.location_city_outlined,
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       flex: 1,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildFieldLabel('Zip Code'),
-                          _buildTextField(
-                            zipController,
-                            '123456',
-                            Icons.pin_drop_outlined,
-                            keyboardType: TextInputType.number,
-                          ),
-                        ],
+                      child: _buildTextField(
+                        zipController,
+                        'Zip Code',
+                        Icons.pin_drop_outlined,
+                        keyboardType: TextInputType.number,
                       ),
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 32),
                 SizedBox(
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: () async {
-                      if (houseNoController.text.trim().isEmpty ||
-                          streetController.text.trim().isEmpty ||
-                          cityController.text.trim().isEmpty ||
-                          zipController.text.trim().isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Please fill all mandatory fields (House No, Street, City, Zip)',
-                            ),
-                          ),
-                        );
+                    onPressed: () {
+                      if (houseNoController.text.isEmpty ||
+                          streetController.text.isEmpty ||
+                          cityController.text.isEmpty ||
+                          zipController.text.isEmpty) {
                         return;
                       }
-
                       final fullAddress =
-                          "${houseNoController.text.trim()}, ${streetController.text.trim()}, ${landmarkController.text.trim().isNotEmpty ? landmarkController.text.trim() + ', ' : ''}${cityController.text.trim()} - ${zipController.text.trim()}";
-
-                      try {
-                        final newAddress = AddressModel(
-                          id: address?.id ?? '',
-                          label: currentLabelType,
-                          houseNumber: houseNoController.text.trim(),
-                          street: streetController.text.trim(),
-                          landmark: landmarkController.text.trim(),
-                          city: cityController.text.trim(),
-                          zipCode: zipController.text.trim(),
-                          address: fullAddress,
-                          isDefault: address?.isDefault ?? false,
-                        );
-
-                        if (address == null) {
-                          await _addressRepository.addAddress(newAddress);
-                        } else {
-                          await _addressRepository.updateAddress(newAddress);
-                        }
-
-                        if (mounted) {
-                          Navigator.pop(context);
-                          _fetchAddresses();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                address == null
-                                    ? 'Address saved successfully!'
-                                    : 'Address updated successfully!',
-                              ),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        }
-                      } catch (e) {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error saving address: $e')),
-                          );
-                        }
-                      }
+                          "${houseNoController.text}, ${streetController.text}, ${cityController.text} - ${zipController.text}";
+                      final newAddress = AddressModel(
+                        id: address?.id ?? '',
+                        label: currentLabelType,
+                        houseNumber: houseNoController.text,
+                        street: streetController.text,
+                        landmark: landmarkController.text,
+                        city: cityController.text,
+                        zipCode: zipController.text,
+                        address: fullAddress,
+                        isDefault: address?.isDefault ?? false,
+                      );
+                      context.read<ProfileBloc>().add(
+                        AddAddressEvent(newAddress),
+                      );
+                      Navigator.pop(context);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      elevation: 0,
                     ),
                     child: Text(
                       address == null ? 'Save Address' : 'Update Address',
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
                       ),
                     ),
                   ),
@@ -501,20 +384,6 @@ class _AddressListScreenState extends State<AddressListScreen> {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFieldLabel(String label) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 13,
-          color: AppColors.textSecondary,
         ),
       ),
     );
@@ -531,20 +400,12 @@ class _AddressListScreenState extends State<AddressListScreen> {
       keyboardType: keyboardType,
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(
-          color: AppColors.textHint.withOpacity(0.5),
-          fontSize: 14,
-        ),
         filled: true,
         fillColor: AppColors.background,
         prefixIcon: Icon(icon, color: AppColors.textHint, size: 20),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
         ),
       ),
     );

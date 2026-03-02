@@ -129,7 +129,7 @@ class OnboardingPage extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [data.color.withOpacity(0.1), Colors.white],
+          colors: [data.color.withValues(alpha: 0.1), Colors.white],
         ),
       ),
       child: Column(

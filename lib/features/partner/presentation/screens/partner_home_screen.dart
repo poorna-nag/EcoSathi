@@ -1,73 +1,126 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ecosathi/core/constants/app_colors.dart';
+import 'package:ecosathi/features/partner/presentation/bloc/partner_bloc.dart';
+import 'package:ecosathi/features/partner/presentation/bloc/partner_event.dart';
+import 'package:ecosathi/features/partner/presentation/bloc/partner_state.dart';
+import 'package:ecosathi/features/pickup/data/models/pickup_model.dart';
 
-class PartnerHomeScreen extends StatelessWidget {
+class PartnerHomeScreen extends StatefulWidget {
   const PartnerHomeScreen({super.key});
+
+  @override
+  State<PartnerHomeScreen> createState() => _PartnerHomeScreenState();
+}
+
+class _PartnerHomeScreenState extends State<PartnerHomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<PartnerBloc>().add(
+      const LoadPartnerProfileEvent('current_partner_id'),
+    );
+    context.read<PartnerBloc>().add(
+      const LoadNearbyRequestsEvent(lat: 0, lng: 0, radiusInKm: 5),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAF9),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(),
-              const SizedBox(height: 32),
-              _buildQuickActions(),
-              const SizedBox(height: 32),
-              _buildPartnerStats(context),
-              const SizedBox(height: 32),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Nearby Requests',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  TextButton(onPressed: () {}, child: const Text('View All')),
-                ],
+      body: BlocBuilder<PartnerBloc, PartnerState>(
+        builder: (context, state) {
+          final partner = state is PartnerLoaded
+              ? state.partner
+              : (state is PartnerProfileLoaded ? state.partner : null);
+          final requests = state is PartnerLoaded
+              ? state.requests
+              : (state is NearbyRequestsLoaded
+                    ? state.requests
+                    : <PickupModel>[]);
+
+          if (state is PartnerLoading && partner == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          return SafeArea(
+            child: RefreshIndicator(
+              onRefresh: () async {
+                context.read<PartnerBloc>().add(
+                  const LoadPartnerProfileEvent('current_partner_id'),
+                );
+                context.read<PartnerBloc>().add(
+                  const LoadNearbyRequestsEvent(lat: 0, lng: 0, radiusInKm: 5),
+                );
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeader(partner),
+                    const SizedBox(height: 32),
+                    _buildQuickActions(),
+                    const SizedBox(height: 32),
+                    _buildPartnerStats(context, partner),
+                    const SizedBox(height: 32),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Nearby Requests',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          child: const Text('View All'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    if (requests.isEmpty)
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(40),
+                          child: Text(
+                            'No nearby requests available.',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ),
+                      )
+                    else
+                      ...requests.map(
+                        (request) => _buildNearbyRequestItem(context, request),
+                      ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 16),
-              _buildNearbyRequestItem(
-                context,
-                'Rahul Sharma',
-                '2.3 km away',
-                '5-10 kg',
-                'HSR Layout, Sector 7',
-                timeRemaining: '12 mins',
-              ),
-              _buildNearbyRequestItem(
-                context,
-                'Priya Singh',
-                '0.8 km away',
-                '2 kg',
-                'HSR Layout, Sector 2',
-                timeRemaining: '5 mins',
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(dynamic partner) {
+    final bool isOnline = partner?.isOnline ?? false;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
-                'assets/images/app_icon.png',
-                width: 45,
-                height: 45,
-                fit: BoxFit.cover,
-              ),
+            const CircleAvatar(
+              radius: 22,
+              backgroundColor: AppColors.primary,
+              child: Icon(Icons.person, color: Colors.white),
             ),
             const SizedBox(width: 12),
             Column(
@@ -75,12 +128,12 @@ class PartnerHomeScreen extends StatelessWidget {
               children: [
                 const Text(
                   'Welcome back,',
-                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                  style: TextStyle(color: Colors.grey, fontSize: 14),
                 ),
                 Text(
-                  'Partner Jack 👋',
+                  partner?.name ?? 'Partner',
                   style: const TextStyle(
-                    fontSize: 24,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -88,32 +141,39 @@ class PartnerHomeScreen extends StatelessWidget {
             ),
           ],
         ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(20),
+        InkWell(
+          onTap: () => context.read<PartnerBloc>().add(
+            ToggleOnlineStatusEvent('current_partner_id', !isOnline),
           ),
-          child: Row(
-            children: [
-              Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                  color: AppColors.primary,
-                  shape: BoxShape.circle,
-                ),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: (isOnline ? AppColors.primary : Colors.grey).withValues(
+                alpha: 0.1,
               ),
-              const SizedBox(width: 8),
-              const Text(
-                'Online',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: isOnline ? AppColors.primary : Colors.grey,
+                    shape: BoxShape.circle,
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 8),
+                Text(
+                  isOnline ? 'Online' : 'Offline',
+                  style: TextStyle(
+                    color: isOnline ? AppColors.primary : Colors.grey,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],
@@ -128,7 +188,7 @@ class PartnerHomeScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppColors.secondary.withOpacity(0.3),
+            color: AppColors.secondary.withValues(alpha: 0.3),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -150,45 +210,43 @@ class PartnerHomeScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 4),
                 Text(
-                  '3x more requests in Koramangala right now.',
+                  'More requests in your area right now.',
                   style: TextStyle(color: Colors.white70, fontSize: 12),
                 ),
               ],
             ),
           ),
+          const SizedBox(width: 16),
           ElevatedButton(
             onPressed: () {},
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
               foregroundColor: AppColors.secondary,
-              elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text('Go There'),
+            child: const Text('View Heatmap'),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPartnerStats(BuildContext context) {
+  Widget _buildPartnerStats(BuildContext context, dynamic partner) {
     return Row(
       children: [
         _buildStatCard(
-          context,
           'Earnings',
-          '₹1,240',
+          '₹${partner?.totalEarnings?.toStringAsFixed(0) ?? "0"}',
           Icons.payments_rounded,
           Colors.green,
         ),
         const SizedBox(width: 16),
         _buildStatCard(
-          context,
-          'Pickups',
-          '12',
-          Icons.local_shipping_rounded,
+          'Completed',
+          '${partner?.completedPickups ?? "0"}',
+          Icons.check_circle_rounded,
           Colors.blue,
         ),
       ],
@@ -196,7 +254,6 @@ class PartnerHomeScreen extends StatelessWidget {
   }
 
   Widget _buildStatCard(
-    BuildContext context,
     String label,
     String value,
     IconData icon,
@@ -210,7 +267,7 @@ class PartnerHomeScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -235,21 +292,14 @@ class PartnerHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildNearbyRequestItem(
-    BuildContext context,
-    String name,
-    String distance,
-    String weight,
-    String address, {
-    String? timeRemaining,
-  }) {
+  Widget _buildNearbyRequestItem(BuildContext context, PickupModel request) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.black.withOpacity(0.03)),
+        border: Border.all(color: Colors.black.withValues(alpha: 0.03)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -268,40 +318,20 @@ class PartnerHomeScreen extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        name,
-                        style: const TextStyle(
+                      const Text(
+                        'Pickup Request',
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
                       ),
-                      Row(
-                        children: [
-                          Text(
-                            distance,
-                            style: const TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          if (timeRemaining != null) ...[
-                            const SizedBox(width: 8),
-                            const Icon(
-                              Icons.access_time_rounded,
-                              size: 12,
-                              color: Colors.grey,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              timeRemaining,
-                              style: const TextStyle(
-                                color: Colors.grey,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ],
+                      Text(
+                        request.plasticType,
+                        style: const TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   ),
@@ -311,14 +341,14 @@ class PartnerHomeScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    weight,
+                    '${request.estimatedWeight} kg',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
                   ),
                   const Text(
-                    'Plastic',
+                    'ESTIMATED',
                     style: TextStyle(color: Colors.grey, fontSize: 10),
                   ),
                 ],
@@ -336,7 +366,7 @@ class PartnerHomeScreen extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  address,
+                  request.address,
                   style: const TextStyle(color: Colors.grey, fontSize: 13),
                 ),
               ),
@@ -360,8 +390,12 @@ class PartnerHomeScreen extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () => context.read<PartnerBloc>().add(
+                    AcceptPickupEvent('current_partner_id', request.id),
+                  ),
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),

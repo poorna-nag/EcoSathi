@@ -16,7 +16,7 @@ class RoleSelectionScreen extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [AppColors.primary.withOpacity(0.05), Colors.white],
+            colors: [AppColors.primary.withValues(alpha: 0.05), Colors.white],
           ),
         ),
         child: Column(
@@ -91,19 +91,19 @@ class RoleSelectionScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
           ],
-          border: Border.all(color: color.withOpacity(0.1), width: 2),
+          border: Border.all(color: color.withValues(alpha: 0.1), width: 2),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: color, size: 32),
