@@ -7,6 +7,7 @@ import 'features/auth/presentation/bloc/auth_state.dart';
 import 'features/auth/presentation/screens/onboarding_screen.dart';
 import 'features/home/presentation/screens/main_navigation_screen.dart';
 import 'features/partner/presentation/screens/partner_main_navigation_screen.dart';
+import 'features/admin/presentation/screens/admin_main_nav_screen.dart';
 import 'features/auth/data/repository_implementations/auth_repository_impl.dart';
 import 'features/auth/data/models/user_model.dart';
 import 'features/orders/presentation/bloc/orders_bloc.dart';
@@ -92,6 +93,12 @@ class AuthWrapper extends StatelessWidget {
         if (state is Authenticated) {
           if (state.user.role == UserRole.partner) {
             return const PartnerMainNavigationScreen();
+          }
+          if (state.user.role == UserRole.admin ||
+              state.user.role == UserRole.developer ||
+              state.user.role == UserRole.hr ||
+              state.user.role == UserRole.support) {
+            return const AdminMainNavigationScreen();
           }
           return const MainNavigationScreen();
         }

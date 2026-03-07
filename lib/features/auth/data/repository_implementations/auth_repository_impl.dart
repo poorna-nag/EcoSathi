@@ -131,6 +131,21 @@ class AuthRepositoryImpl implements AuthRepository {
             .doc(userCredential.user!.uid)
             .set(newUser.toMap());
 
+        // If user is a partner, also create a record in partners collection
+        if (role == UserRole.partner) {
+          await _firestore
+              .collection('partners')
+              .doc(userCredential.user!.uid)
+              .set({
+                'name': cleanName,
+                'isOnline': false,
+                'todayPickups': 0,
+                'todayEarnings': 0.0,
+                'rating': 5.0,
+                'createdAt': FieldValue.serverTimestamp(),
+              });
+        }
+
         return newUser;
       }
       return null;

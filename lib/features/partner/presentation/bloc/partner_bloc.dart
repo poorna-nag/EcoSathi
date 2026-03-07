@@ -9,9 +9,12 @@ class PartnerBloc extends Bloc<PartnerEvent, PartnerState> {
   PartnerBloc({required this.repository}) : super(PartnerInitial()) {
     on<LoadPartnerProfileEvent>(_onLoadPartnerProfile);
     on<LoadNearbyRequestsEvent>(_onLoadNearbyRequests);
+    on<LoadPartnerTasksEvent>(_onLoadPartnerTasks);
+    on<UpdateTaskStatusEvent>(_onUpdateTaskStatus);
     on<ToggleOnlineStatusEvent>(_onToggleOnlineStatus);
     on<AcceptPickupEvent>(_onAcceptPickup);
     on<UpdatePartnerLocationEvent>(_onUpdatePartnerLocation);
+    on<SubmitVerificationEvent>(_onSubmitVerification);
   }
 
   Future<void> _onLoadPartnerProfile(
@@ -29,7 +32,13 @@ class PartnerBloc extends Bloc<PartnerEvent, PartnerState> {
         if (currentState is PartnerLoaded) {
           emit(currentState.copyWith(partner: partner));
         } else {
-          emit(PartnerLoaded(partner: partner, requests: const []));
+          emit(
+            PartnerLoaded(
+              partner: partner,
+              requests: const [],
+              tasks: const [],
+            ),
+          );
         }
       } else {
         emit(const PartnerError('Partner profile not found'));
@@ -43,8 +52,6 @@ class PartnerBloc extends Bloc<PartnerEvent, PartnerState> {
     LoadNearbyRequestsEvent event,
     Emitter<PartnerState> emit,
   ) async {
-    // currentState is not used here
-
     await emit.forEach(
       repository.getNearbyRequests(event.lat, event.lng, event.radiusInKm),
       onData: (requests) {
@@ -56,6 +63,33 @@ class PartnerBloc extends Bloc<PartnerEvent, PartnerState> {
       },
       onError: (error, stackTrace) => PartnerError(error.toString()),
     );
+  }
+
+  Future<void> _onLoadPartnerTasks(
+    LoadPartnerTasksEvent event,
+    Emitter<PartnerState> emit,
+  ) async {
+    await emit.forEach(
+      repository.getPartnerTasks(event.partnerId),
+      onData: (tasks) {
+        if (state is PartnerLoaded) {
+          return (state as PartnerLoaded).copyWith(tasks: tasks);
+        }
+        return state; // Should ideally ensure PartnerLoaded exists
+      },
+      onError: (error, stackTrace) => PartnerError(error.toString()),
+    );
+  }
+
+  Future<void> _onUpdateTaskStatus(
+    UpdateTaskStatusEvent event,
+    Emitter<PartnerState> emit,
+  ) async {
+    try {
+      await repository.updateTaskStatus(event.pickupId, event.status);
+    } catch (e) {
+      emit(PartnerError(e.toString()));
+    }
   }
 
   Future<void> _onToggleOnlineStatus(
@@ -76,7 +110,6 @@ class PartnerBloc extends Bloc<PartnerEvent, PartnerState> {
   ) async {
     try {
       await repository.acceptPickup(event.partnerId, event.pickupId);
-      // optionally trigger reload requests if needed
     } catch (e) {
       emit(PartnerError(e.toString()));
     }
@@ -94,6 +127,26 @@ class PartnerBloc extends Bloc<PartnerEvent, PartnerState> {
       );
     } catch (e) {
       // ignore
+    }
+  }
+
+  Future<void> _onSubmitVerification(
+    SubmitVerificationEvent event,
+    Emitter<PartnerState> emit,
+  ) async {
+    emit(PartnerLoading());
+    try {
+      await repository.submitVerification(
+        partnerId: event.partnerId,
+        aadharFrontPath: event.aadharFrontPath,
+        aadharBackPath: event.aadharBackPath,
+        panFrontPath: event.panFrontPath,
+        panBackPath: event.panBackPath,
+        selfiePath: event.selfiePath,
+      );
+      add(LoadPartnerProfileEvent(event.partnerId));
+    } catch (e) {
+      emit(PartnerError(e.toString()));
     }
   }
 }

@@ -17,4 +17,14 @@ abstract class PartnerRepository {
     double finalWeight,
     String photoProof,
   );
+  Future<void> updateTaskStatus(String pickupId, PickupStatus status);
+  Stream<List<PickupModel>> getPartnerTasks(String partnerId);
+  Future<void> submitVerification({
+    required String partnerId,
+    required String aadharFrontPath,
+    required String aadharBackPath,
+    required String panFrontPath,
+    required String panBackPath,
+    required String selfiePath,
+  });
 }

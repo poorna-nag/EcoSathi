@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:ecosathi/features/pickup/data/models/pickup_model.dart';
 
 abstract class PartnerEvent extends Equatable {
   const PartnerEvent();
@@ -59,4 +60,50 @@ class UpdatePartnerLocationEvent extends PartnerEvent {
 
   @override
   List<Object?> get props => [partnerId, lat, lng];
+}
+
+class LoadPartnerTasksEvent extends PartnerEvent {
+  final String partnerId;
+  const LoadPartnerTasksEvent(this.partnerId);
+
+  @override
+  List<Object?> get props => [partnerId];
+}
+
+class UpdateTaskStatusEvent extends PartnerEvent {
+  final String pickupId;
+  final PickupStatus status;
+
+  const UpdateTaskStatusEvent(this.pickupId, this.status);
+
+  @override
+  List<Object?> get props => [pickupId, status];
+}
+
+class SubmitVerificationEvent extends PartnerEvent {
+  final String partnerId;
+  final String aadharFrontPath;
+  final String aadharBackPath;
+  final String panFrontPath;
+  final String panBackPath;
+  final String selfiePath;
+
+  const SubmitVerificationEvent({
+    required this.partnerId,
+    required this.aadharFrontPath,
+    required this.aadharBackPath,
+    required this.panFrontPath,
+    required this.panBackPath,
+    required this.selfiePath,
+  });
+
+  @override
+  List<Object?> get props => [
+    partnerId,
+    aadharFrontPath,
+    aadharBackPath,
+    panFrontPath,
+    panBackPath,
+    selfiePath,
+  ];
 }

@@ -10,7 +10,7 @@ class OrdersRepositoryImpl implements OrdersRepository {
     final snapshot = await _firestore
         .collection('pickups')
         .where('userId', isEqualTo: userId)
-        .orderBy('createdAt', descending: true)
+        .orderBy('scheduledTime', descending: true)
         .get();
 
     return snapshot.docs
@@ -23,7 +23,7 @@ class OrdersRepositoryImpl implements OrdersRepository {
     final snapshot = await _firestore
         .collection('pickups')
         .where('partnerId', isEqualTo: partnerId)
-        .orderBy('createdAt', descending: true)
+        .orderBy('scheduledTime', descending: true)
         .get();
 
     return snapshot.docs

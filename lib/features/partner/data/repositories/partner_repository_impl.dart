@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
 import 'package:ecosathi/features/partner/data/models/partner_model.dart';
 import 'package:ecosathi/features/partner/data/repositories/partner_repository.dart';
 import 'package:ecosathi/features/pickup/data/models/pickup_model.dart';
@@ -9,8 +11,32 @@ class PartnerRepositoryImpl implements PartnerRepository {
   @override
   Future<PartnerModel?> getPartnerProfile(String partnerId) async {
     final doc = await _firestore.collection('partners').doc(partnerId).get();
-    if (!doc.exists || doc.data() == null) return null;
-    return PartnerModel.fromMap(doc.data()!, doc.id);
+
+    if (doc.exists && doc.data() != null) {
+      return PartnerModel.fromMap(doc.data()!, doc.id);
+    }
+
+    // If not found, check if it's a valid user who needs a partner profile doc
+    final userDoc = await _firestore.collection('users').doc(partnerId).get();
+    if (userDoc.exists && userDoc.data()?['role'] == 'partner') {
+      final userData = userDoc.data()!;
+      final newPartner = PartnerModel(
+        id: partnerId,
+        name: userData['name'] ?? 'Partner',
+        isOnline: false,
+        todayPickups: 0,
+        todayEarnings: 0.0,
+        rating: 5.0,
+      );
+
+      await _firestore
+          .collection('partners')
+          .doc(partnerId)
+          .set(newPartner.toMap());
+      return newPartner;
+    }
+
+    return null;
   }
 
   @override
@@ -70,6 +96,63 @@ class PartnerRepositoryImpl implements PartnerRepository {
       'finalWeight': finalWeight,
       'photoProof': photoProof,
       'completedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  @override
+  Future<void> updateTaskStatus(String pickupId, PickupStatus status) async {
+    await _firestore.collection('pickups').doc(pickupId).update({
+      'status': status.name,
+    });
+  }
+
+  @override
+  Stream<List<PickupModel>> getPartnerTasks(String partnerId) {
+    return _firestore
+        .collection('pickups')
+        .where('partnerId', isEqualTo: partnerId)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => PickupModel.fromMap(doc.data(), doc.id))
+              .toList();
+        });
+  }
+
+  @override
+  Future<void> submitVerification({
+    required String partnerId,
+    required String aadharFrontPath,
+    required String aadharBackPath,
+    required String panFrontPath,
+    required String panBackPath,
+    required String selfiePath,
+  }) async {
+    final storageRef = FirebaseStorage.instance.ref();
+
+    Future<String> uploadFile(String path, String name) async {
+      final file = File(path);
+      final ref = storageRef.child('partners/$partnerId/verification/$name');
+      await ref.putFile(file);
+      return await ref.getDownloadURL();
+    }
+
+    final urls = await Future.wait([
+      uploadFile(aadharFrontPath, 'aadhar_front.jpg'),
+      uploadFile(aadharBackPath, 'aadhar_back.jpg'),
+      uploadFile(panFrontPath, 'pan_front.jpg'),
+      uploadFile(panBackPath, 'pan_back.jpg'),
+      uploadFile(selfiePath, 'selfie.jpg'),
+    ]);
+
+    await _firestore.collection('partners').doc(partnerId).update({
+      'verificationStatus': 'pending',
+      'aadharFrontUrl': urls[0],
+      'aadharBackUrl': urls[1],
+      'panFrontUrl': urls[2],
+      'panBackUrl': urls[3],
+      'selfieUrl': urls[4],
+      'submittedAt': FieldValue.serverTimestamp(),
     });
   }
 }

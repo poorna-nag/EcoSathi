@@ -16,16 +16,26 @@ class PartnerLoading extends PartnerState {}
 class PartnerLoaded extends PartnerState {
   final PartnerModel partner;
   final List<PickupModel> requests;
+  final List<PickupModel> tasks;
 
-  const PartnerLoaded({required this.partner, required this.requests});
+  const PartnerLoaded({
+    required this.partner,
+    required this.requests,
+    required this.tasks,
+  });
 
   @override
-  List<Object?> get props => [partner, requests];
+  List<Object?> get props => [partner, requests, tasks];
 
-  PartnerLoaded copyWith({PartnerModel? partner, List<PickupModel>? requests}) {
+  PartnerLoaded copyWith({
+    PartnerModel? partner,
+    List<PickupModel>? requests,
+    List<PickupModel>? tasks,
+  }) {
     return PartnerLoaded(
       partner: partner ?? this.partner,
       requests: requests ?? this.requests,
+      tasks: tasks ?? this.tasks,
     );
   }
 }

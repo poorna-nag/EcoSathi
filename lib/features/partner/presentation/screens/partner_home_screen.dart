@@ -5,6 +5,9 @@ import 'package:ecosathi/features/partner/presentation/bloc/partner_bloc.dart';
 import 'package:ecosathi/features/partner/presentation/bloc/partner_event.dart';
 import 'package:ecosathi/features/partner/presentation/bloc/partner_state.dart';
 import 'package:ecosathi/features/pickup/data/models/pickup_model.dart';
+import 'package:ecosathi/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:ecosathi/features/auth/presentation/bloc/auth_state.dart';
+import 'package:ecosathi/features/partner/presentation/screens/partner_verification_screen.dart';
 
 class PartnerHomeScreen extends StatefulWidget {
   const PartnerHomeScreen({super.key});
@@ -17,9 +20,16 @@ class _PartnerHomeScreenState extends State<PartnerHomeScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<PartnerBloc>().add(
-      const LoadPartnerProfileEvent('current_partner_id'),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authState = context.read<AuthBloc>().state;
+      if (authState is Authenticated) {
+        _refreshData(authState.user.id);
+      }
+    });
+  }
+
+  void _refreshData(String partnerId) {
+    context.read<PartnerBloc>().add(LoadPartnerProfileEvent(partnerId));
     context.read<PartnerBloc>().add(
       const LoadNearbyRequestsEvent(lat: 0, lng: 0, radiusInKm: 5),
     );
@@ -27,90 +37,133 @@ class _PartnerHomeScreenState extends State<PartnerHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAF9),
-      body: BlocBuilder<PartnerBloc, PartnerState>(
-        builder: (context, state) {
-          final partner = state is PartnerLoaded
-              ? state.partner
-              : (state is PartnerProfileLoaded ? state.partner : null);
-          final requests = state is PartnerLoaded
-              ? state.requests
-              : (state is NearbyRequestsLoaded
-                    ? state.requests
-                    : <PickupModel>[]);
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, authState) {
+        if (authState is! Authenticated) {
+          return const Scaffold(
+            body: Center(child: Text('Please log in for partner access.')),
+          );
+        }
+        final partnerId = authState.user.id;
 
-          if (state is PartnerLoading && partner == null) {
-            return const Center(child: CircularProgressIndicator());
-          }
+        return Scaffold(
+          backgroundColor: const Color(0xFFF8FAF9),
+          body: BlocBuilder<PartnerBloc, PartnerState>(
+            builder: (context, state) {
+              if (state is PartnerError) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline_rounded,
+                        size: 60,
+                        color: Colors.red,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        state.message,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: () => _refreshData(partnerId),
+                        child: const Text('Try Again'),
+                      ),
+                    ],
+                  ),
+                );
+              }
 
-          return SafeArea(
-            child: RefreshIndicator(
-              onRefresh: () async {
-                context.read<PartnerBloc>().add(
-                  const LoadPartnerProfileEvent('current_partner_id'),
+              final partner = state is PartnerLoaded
+                  ? state.partner
+                  : (state is PartnerProfileLoaded ? state.partner : null);
+              final requests = state is PartnerLoaded
+                  ? state.requests
+                  : (state is NearbyRequestsLoaded
+                        ? state.requests
+                        : <PickupModel>[]);
+
+              if (state is PartnerLoading && partner == null) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (partner != null && partner.verificationStatus != 'verified') {
+                return _buildVerificationStatusOverlay(
+                  context,
+                  partner,
+                  partnerId,
                 );
-                context.read<PartnerBloc>().add(
-                  const LoadNearbyRequestsEvent(lat: 0, lng: 0, radiusInKm: 5),
-                );
-              },
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(partner),
-                    const SizedBox(height: 32),
-                    _buildQuickActions(),
-                    const SizedBox(height: 32),
-                    _buildPartnerStats(context, partner),
-                    const SizedBox(height: 32),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              }
+
+              return SafeArea(
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    _refreshData(partnerId);
+                  },
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Nearby Requests',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+                        _buildHeader(partner, partnerId),
+                        const SizedBox(height: 32),
+                        _buildQuickActions(),
+                        const SizedBox(height: 32),
+                        _buildPartnerStats(context, partner),
+                        const SizedBox(height: 32),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Nearby Requests',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {},
+                              child: const Text('View All'),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        if (requests.isEmpty)
+                          const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(40),
+                              child: Text(
+                                'No nearby requests available.',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ),
+                          )
+                        else
+                          ...requests.map(
+                            (request) => _buildNearbyRequestItem(
+                              context,
+                              request,
+                              partnerId,
+                            ),
                           ),
-                        ),
-                        TextButton(
-                          onPressed: () {},
-                          child: const Text('View All'),
-                        ),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    if (requests.isEmpty)
-                      const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(40),
-                          child: Text(
-                            'No nearby requests available.',
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        ),
-                      )
-                    else
-                      ...requests.map(
-                        (request) => _buildNearbyRequestItem(context, request),
-                      ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          );
-        },
-      ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildHeader(dynamic partner) {
+  Widget _buildHeader(dynamic partner, String partnerId) {
     final bool isOnline = partner?.isOnline ?? false;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -143,7 +196,7 @@ class _PartnerHomeScreenState extends State<PartnerHomeScreen> {
         ),
         InkWell(
           onTap: () => context.read<PartnerBloc>().add(
-            ToggleOnlineStatusEvent('current_partner_id', !isOnline),
+            ToggleOnlineStatusEvent(partnerId, !isOnline),
           ),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -292,7 +345,11 @@ class _PartnerHomeScreenState extends State<PartnerHomeScreen> {
     );
   }
 
-  Widget _buildNearbyRequestItem(BuildContext context, PickupModel request) {
+  Widget _buildNearbyRequestItem(
+    BuildContext context,
+    PickupModel request,
+    String partnerId,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
@@ -391,7 +448,7 @@ class _PartnerHomeScreenState extends State<PartnerHomeScreen> {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () => context.read<PartnerBloc>().add(
-                    AcceptPickupEvent('current_partner_id', request.id),
+                    AcceptPickupEvent(partnerId, request.id),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
@@ -407,6 +464,112 @@ class _PartnerHomeScreenState extends State<PartnerHomeScreen> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildVerificationStatusOverlay(
+    BuildContext context,
+    dynamic partner,
+    String partnerId,
+  ) {
+    String title = '';
+    String description = '';
+    IconData icon = Icons.info_outline;
+    Color color = Colors.orange;
+    bool showButton = false;
+
+    switch (partner.verificationStatus) {
+      case 'unsubmitted':
+        title = 'Identity Verification Required';
+        description =
+            'Please upload your documents to start receiving requests.';
+        icon = Icons.assignment_ind_outlined;
+        showButton = true;
+        break;
+      case 'pending':
+        title = 'Verification Pending';
+        description =
+            'Your documents are currently being reviewed. This usually takes 24-48 hours.';
+        icon = Icons.access_time_rounded;
+        color = Colors.blue;
+        break;
+      case 'rejected':
+        title = 'Verification Failed';
+        description =
+            'Your documents were rejected. Please re-upload clear photos.';
+        icon = Icons.error_outline_rounded;
+        color = Colors.red;
+        showButton = true;
+        break;
+      default:
+        title = 'Identity Verification';
+        description = 'Please complete your verification process.';
+        icon = Icons.assignment_ind_outlined;
+        showButton = true;
+    }
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 80, color: color),
+            ),
+            const SizedBox(height: 32),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              description,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+            ),
+            const SizedBox(height: 48),
+            if (showButton)
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            PartnerVerificationScreen(partnerId: partnerId),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: const Text(
+                    'Verify Now',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            if (!showButton && partner.verificationStatus == 'pending')
+              ElevatedButton(
+                onPressed: () => _refreshData(partnerId),
+                child: const Text('Check Status'),
+              ),
+          ],
+        ),
       ),
     );
   }
