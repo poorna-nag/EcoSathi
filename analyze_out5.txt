@@ -1,0 +1,21 @@
+Analyzing ecosathi...                                           
+
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/presentation/screens/login_screen.dart:51:44 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/presentation/screens/onboarding_screen.dart:132:31 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/presentation/screens/role_selection_screen.dart:19:40 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/presentation/screens/role_selection_screen.dart:94:28 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/presentation/screens/role_selection_screen.dart:99:43 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/presentation/screens/role_selection_screen.dart:106:30 • deprecated_member_use
+   info • The parameter name 'StackTrace' matches a visible type name • lib/features/partner/presentation/bloc/partner_bloc.dart:57:24 • avoid_types_as_parameter_names
+   info • The variable name 'StackTrace' isn't a lowerCamelCase identifier • lib/features/partner/presentation/bloc/partner_bloc.dart:57:24 • non_constant_identifier_names
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/pickup/presentation/screens/guidelines_screen.dart:90:57 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/pickup/presentation/screens/guidelines_screen.dart:97:38 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/pickup/presentation/screens/guidelines_screen.dart:137:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/pickup/presentation/screens/guidelines_screen.dart:151:32 • deprecated_member_use
+   info • Statements in an if should be enclosed in a block • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:66:11 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:177:33 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:179:33 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/features/pickup/presentation/widgets/request_pickup_sheet.dart:226:31 • curly_braces_in_flow_control_structures
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor or activeTrackColor instead. This feature was deprecated after v3.31.0-2.0.pre • lib/features/profile/presentation/screens/settings_screen.dart:253:9 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor or activeTrackColor instead. This feature was deprecated after v3.31.0-2.0.pre • lib/features/profile/presentation/screens/settings_screen.dart:392:17 • deprecated_member_use
+

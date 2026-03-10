@@ -1,0 +1,41 @@
+import 'package:equatable/equatable.dart';
+import '../../data/models/user_model.dart';
+
+abstract class AuthEvent extends Equatable {
+  const AuthEvent();
+
+  @override
+  List<Object> get props => [];
+}
+
+class CheckAuthSessionEvent extends AuthEvent {}
+
+class LoginEvent extends AuthEvent {
+  final String identifier;
+  final String password;
+  const LoginEvent({required this.identifier, required this.password});
+
+  @override
+  List<Object> get props => [identifier, password];
+}
+
+class LogoutEvent extends AuthEvent {}
+
+class RegisterEvent extends AuthEvent {
+  final String name;
+  final String email;
+  final String phone;
+  final String password;
+  final UserRole role;
+
+  const RegisterEvent({
+    required this.name,
+    required this.email,
+    required this.phone,
+    required this.password,
+    required this.role,
+  });
+
+  @override
+  List<Object> get props => [name, email, phone, password, role];
+}
