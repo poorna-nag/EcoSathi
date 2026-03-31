@@ -1,33 +1,32 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
+import 'core/localization/language_cubit.dart';
 import 'core/theme/app_theme.dart';
+import 'features/admin/presentation/screens/admin_main_nav_screen.dart';
+import 'features/auth/data/models/user_model.dart';
+import 'features/auth/data/repository_implementations/auth_repository_impl.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
 import 'features/auth/presentation/bloc/auth_state.dart';
 import 'features/auth/presentation/screens/onboarding_screen.dart';
 import 'features/home/presentation/screens/main_navigation_screen.dart';
-import 'features/partner/presentation/screens/partner_main_navigation_screen.dart';
-import 'features/admin/presentation/screens/admin_main_nav_screen.dart';
-import 'features/auth/data/repository_implementations/auth_repository_impl.dart';
-import 'features/auth/data/models/user_model.dart';
-import 'features/orders/presentation/bloc/orders_bloc.dart';
 import 'features/orders/data/repository_implementations/orders_repository_impl.dart';
-import 'features/partner/presentation/bloc/partner_bloc.dart';
+import 'features/orders/presentation/bloc/orders_bloc.dart';
 import 'features/partner/data/repositories/partner_repository_impl.dart';
-import 'features/pickup/presentation/bloc/pickup_bloc.dart';
-import 'features/pickup/data/repositories/pickup_repository.dart';
-import 'features/profile/presentation/bloc/profile_bloc.dart';
+import 'features/partner/presentation/bloc/partner_bloc.dart';
+import 'features/partner/presentation/screens/partner_main_navigation_screen.dart';
 import 'features/pickup/data/repositories/address_repository.dart';
-import 'core/localization/language_cubit.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'features/pickup/data/repositories/pickup_repository.dart';
+import 'features/pickup/presentation/bloc/pickup_bloc.dart';
+import 'features/profile/presentation/bloc/profile_bloc.dart';
 import 'l10n/app_localizations.dart';
-
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp();
   runApp(const EcoSathiApp());
 }
 
